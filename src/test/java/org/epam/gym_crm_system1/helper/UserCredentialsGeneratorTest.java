@@ -1,8 +1,7 @@
-package org.epam.gym_crm_system1;
+package org.epam.gym_crm_system1.helper;
 
 import org.epam.gym_crm_system1.dao.TraineeDao;
 import org.epam.gym_crm_system1.dao.TrainerDao;
-import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.storage.Storage;

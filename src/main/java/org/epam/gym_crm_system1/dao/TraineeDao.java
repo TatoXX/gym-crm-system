@@ -35,7 +35,16 @@ public class TraineeDao {
 
         logger.info("Finding trainee with id {}", userId);
 
-        return storage.getTrainees().get(userId);
+        Trainee trainee =
+                storage.getTrainees().get(userId);
+
+        if (trainee == null) {
+
+            logger.warn("Trainee with id {} not found",
+                    userId);
+        }
+
+        return trainee;
     }
 
     public Collection<Trainee> findAllTrainees() {

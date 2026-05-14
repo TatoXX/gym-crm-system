@@ -46,7 +46,16 @@ public class TrainerDao {
 
         logger.info("Finding trainer with id {}", trainerId);
 
-        return storage.getTrainers().get(trainerId);
+        Trainer trainer =
+                storage.getTrainers().get(trainerId);
+
+        if (trainer == null) {
+
+            logger.warn("Trainer with id {} not found",
+                    trainerId);
+        }
+
+        return trainer;
     }
 
     public Collection<Trainer> getAllTrainers() {
