@@ -1,7 +1,7 @@
 package org.epam.gym_crm_system1.storage;
 
 import jakarta.annotation.PostConstruct;
-import org.epam.gym_crm_system1.model.Specialization;
+import org.epam.gym_crm_system1.model.TrainingType;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -135,7 +135,7 @@ public class StorageInitializer {
                 Trainer trainer =
                         new Trainer(firstName,
                                 lastName,
-                                new Specialization(0, specializationName),
+                                new TrainingType(0, specializationName),
                                 id);
 
                 trainer.setUserName(userName);
@@ -189,7 +189,7 @@ public class StorageInitializer {
                 Training training =
                         new Training(
                                 trainingName,
-                                new Specialization(0, specializationName),
+                                new TrainingType(0, specializationName),
                                 trainingDate,
                                 duration,
                                 trainerId,

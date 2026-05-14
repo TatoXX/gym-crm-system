@@ -1,27 +1,27 @@
 package org.epam.gym_crm_system1.model;
 
 public class Trainer extends User{
-    private Specialization specialization;
+    private TrainingType trainingType;
     private int userId;
 
     public Trainer(){
 
     }
-    public Trainer(String firstName, String lastName, Specialization specialization, int userId) {
+    public Trainer(String firstName, String lastName, TrainingType trainingType, int userId) {
         setFirstName(firstName);
         setLastName(lastName);
 
-        this.specialization = specialization;
+        this.trainingType = trainingType;
         this.userId = userId;
     }
 
 
-    public Specialization getSpecialization() {
-        return specialization;
+    public TrainingType getSpecialization() {
+        return trainingType;
     }
 
-    public void setSpecialization(Specialization specialization) {
-        this.specialization = specialization;
+    public void setSpecialization(TrainingType trainingType) {
+        this.trainingType = trainingType;
     }
 
     public int getUserId() {
@@ -35,7 +35,7 @@ public class Trainer extends User{
     @Override
     public String toString() {
         return "Trainer{" +
-                "specialization=" + specialization +
+                "specialization=" + trainingType +
                 ", userId=" + userId +
                 '}';
     }

@@ -3,7 +3,7 @@ package org.epam.gym_crm_system1.service;
 import org.epam.gym_crm_system1.dao.TraineeDao;
 import org.epam.gym_crm_system1.dao.TrainerDao;
 import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
-import org.epam.gym_crm_system1.model.Specialization;
+import org.epam.gym_crm_system1.model.TrainingType;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ class TrainerServiceTest {
                 new Trainer(
                         "John",
                         "Smith",
-                        new Specialization(1, "Fitness"),
+                        new TrainingType(1, "Fitness"),
                         1
                 );
 

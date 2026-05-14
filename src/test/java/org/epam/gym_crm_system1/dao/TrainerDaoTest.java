@@ -1,6 +1,6 @@
 package org.epam.gym_crm_system1.dao;
 
-import org.epam.gym_crm_system1.model.Specialization;
+import org.epam.gym_crm_system1.model.TrainingType;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class TrainerDaoTest {
                 new Trainer(
                         "John",
                         "Smith",
-                        new Specialization(1, "Fitness"),
+                        new TrainingType(1, "Fitness"),
                         1
                 );
 
@@ -43,14 +43,14 @@ class TrainerDaoTest {
                 new Trainer(
                         "John",
                         "Smith",
-                        new Specialization(1, "Fitness"),
+                        new TrainingType(1, "Fitness"),
                         1
                 );
 
         trainerDao.saveTrainer(trainer);
 
         trainer.setSpecialization(
-                new Specialization(2, "Yoga")
+                new TrainingType(2, "Yoga")
         );
 
         trainerDao.updateTrainer(trainer);

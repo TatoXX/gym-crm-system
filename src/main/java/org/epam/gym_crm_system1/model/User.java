@@ -1,6 +1,6 @@
 package org.epam.gym_crm_system1.model;
 
-public class User {
+public abstract class User {
     private String firstName;
     private String lastName;
     private String userName;

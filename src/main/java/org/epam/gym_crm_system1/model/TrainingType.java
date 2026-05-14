@@ -1,13 +1,13 @@
 package org.epam.gym_crm_system1.model;
 
-public class Specialization {
+public class TrainingType {
     private int id;
     private String name;
 
-    public Specialization() {
+    public TrainingType() {
     }
 
-    public Specialization(int id, String name) {
+    public TrainingType(int id, String name) {
         this.id = id;
         this.name = name;
     }
