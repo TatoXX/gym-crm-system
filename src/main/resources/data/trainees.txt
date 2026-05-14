@@ -1,0 +1,5 @@
+1,John,Smith,john.smith,password123,true,Tbilisi,2000-01-01
+2,Ana,Brown,ana.brown,password456,true,Batumi,1999-05-10
+3,David,Green,david.green,password789,false,Rustavi,2001-09-15
+4,Emma,Wilson,emma.wilson,password321,true,Kutaisi,1998-12-03
+5,Luka,Japaridze,luka.japaridze,password654,true,Tbilisi,2002-07-21

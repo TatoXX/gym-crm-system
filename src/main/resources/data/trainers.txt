@@ -1,0 +1,5 @@
+1,George,White,george.white,trainer111,true,Fitness
+2,Sophia,Black,sophia.black,trainer222,true,Boxing
+3,Michael,Stone,michael.stone,trainer333,false,Yoga
+4,Nina,Davis,nina.davis,trainer444,true,Crossfit
+5,Alex,Miller,alex.miller,trainer555,true,Swimming

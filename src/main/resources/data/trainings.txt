@@ -1,0 +1,10 @@
+1,Morning Cardio,Fitness,2025-05-01,60,1,1
+2,Evening Boxing,Boxing,2025-05-03,90,2,2
+3,Yoga Basics,Yoga,2025-05-05,45,3,3
+4,Crossfit Intro,Crossfit,2025-05-06,75,4,4
+5,Swimming Practice,Swimming,2025-05-07,50,5,5
+6,Advanced Fitness,Fitness,2025-05-08,80,1,2
+7,Boxing Sparring,Boxing,2025-05-09,70,2,1
+8,Morning Yoga,Yoga,2025-05-10,40,3,5
+9,Crossfit Challenge,Crossfit,2025-05-11,90,4,3
+10,Swimming Endurance,Swimming,2025-05-12,65,5,4
