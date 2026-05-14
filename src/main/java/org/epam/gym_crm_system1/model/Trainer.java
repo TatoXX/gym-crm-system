@@ -8,8 +8,7 @@ public class Trainer extends User{
 
     }
     public Trainer(String firstName, String lastName, TrainingType trainingType, int userId) {
-        setFirstName(firstName);
-        setLastName(lastName);
+        super(firstName, lastName, null, null, false);
 
         this.trainingType = trainingType;
         this.userId = userId;

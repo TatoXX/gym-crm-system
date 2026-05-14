@@ -13,8 +13,7 @@ public class Trainee extends User{
     }
 
     public Trainee(String firstName, String lastName, String address, LocalDate dateOfBirth, int userId) {
-        setFirstName(firstName);
-        setLastName(lastName);
+        super(firstName, lastName, null, null, false);
 
         this.address = address;
         this.dateOfBirth = dateOfBirth;
