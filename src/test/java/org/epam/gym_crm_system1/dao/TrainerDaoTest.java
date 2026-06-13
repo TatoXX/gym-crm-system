@@ -21,9 +21,10 @@ class TrainerDaoTest {
                 new Trainer(
                         "John",
                         "Smith",
-                        new TrainingType(1, "Fitness"),
-                        1
+                        new TrainingType(1, "Fitness")
                 );
+
+        trainer.setId(1);
 
         trainerDao.saveTrainer(trainer);
 
@@ -43,13 +44,14 @@ class TrainerDaoTest {
                 new Trainer(
                         "John",
                         "Smith",
-                        new TrainingType(1, "Fitness"),
-                        1
+                        new TrainingType(1, "Fitness")
                 );
+
+        trainer.setId(1);
 
         trainerDao.saveTrainer(trainer);
 
-        trainer.setSpecialization(
+        trainer.setTrainingType(
                 new TrainingType(2, "Yoga")
         );
 
@@ -57,7 +59,7 @@ class TrainerDaoTest {
 
         assertEquals("Yoga",
                 trainerDao.getTrainerById(1)
-                        .getSpecialization()
+                        .getTrainingType()
                         .getName());
     }
 }

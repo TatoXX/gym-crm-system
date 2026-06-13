@@ -28,7 +28,7 @@ public class TrainerService {
     public void createTrainer(Trainer trainer) {
 
         logger.info("Creating trainer with id {}",
-                trainer.getUserId());
+                trainer.getId());
 
         String username =
                 userCredentialsGenerator.generateUsername(trainer);
@@ -56,7 +56,7 @@ public class TrainerService {
     public void updateTrainer(Trainer trainer) {
 
         logger.info("Updating trainer with id {}",
-                trainer.getUserId());
+                trainer.getId());
 
         trainerDao.updateTrainer(trainer);
 

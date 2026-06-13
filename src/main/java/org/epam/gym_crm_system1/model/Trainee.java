@@ -1,39 +1,36 @@
 package org.epam.gym_crm_system1.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class Trainee extends User{
+@Entity
+@Table(name = "trainees")
+public class Trainee extends User {
+
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
-    private String address;
-    private int userId;
 
+    @Column(name = "address")
+    private String address;
+
+    @ManyToMany(mappedBy = "trainees")
+    private Set<Trainer> trainers = new HashSet<>();
+
+    @OneToMany(mappedBy = "trainee", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Training> trainings = new ArrayList<>();
 
     public Trainee() {
-
     }
 
-    public Trainee(String firstName, String lastName, String address, LocalDate dateOfBirth, int userId) {
+    public Trainee(String firstName, String lastName, String address, LocalDate dateOfBirth) {
         super(firstName, lastName, null, null, false);
-
         this.address = address;
         this.dateOfBirth = dateOfBirth;
-        this.userId = userId;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public LocalDate getDateOfBirth() {
@@ -44,12 +41,43 @@ public class Trainee extends User{
         this.dateOfBirth = dateOfBirth;
     }
 
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+
+    public Set<Trainer> getTrainers() {
+        return trainers;
+    }
+
+    public void setTrainers(Set<Trainer> trainers) {
+        this.trainers = trainers;
+    }
+
+
+    public List<Training> getTrainings() {
+        return trainings;
+    }
+
+    public void setTrainings(List<Training> trainings) {
+        this.trainings = trainings;
+    }
+
     @Override
     public String toString() {
         return "Trainee{" +
-                "dateOfBirth=" + dateOfBirth +
+                "id=" + getId() +
+                ", firstName='" + getFirstName() + '\'' +
+                ", lastName='" + getLastName() + '\'' +
+                ", userName='" + getUserName() + '\'' +
+                ", isActive=" + getIsActive() +
+                ", dateOfBirth=" + dateOfBirth +
                 ", address='" + address + '\'' +
-                ", userId=" + userId +
                 '}';
     }
 }

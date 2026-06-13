@@ -23,10 +23,10 @@ public class TraineeDao {
     public void saveTrainee(Trainee trainee) {
 
         logger.info("Saving trainee with id {}",
-                trainee.getUserId());
+                trainee.getId());
 
         storage.getTrainees()
-                .put(trainee.getUserId(), trainee);
+                .put(trainee.getId(), trainee);
 
         logger.info("Trainee saved successfully");
     }
@@ -57,10 +57,10 @@ public class TraineeDao {
     public void updateTrainee(Trainee trainee) {
 
         logger.info("Updating trainee with id {}",
-                trainee.getUserId());
+                trainee.getId());
 
         storage.getTrainees()
-                .put(trainee.getUserId(), trainee);
+                .put(trainee.getId(), trainee);
 
         logger.info("Trainee updated successfully");
     }

@@ -28,7 +28,7 @@ public class TraineeService {
     public void createTrainee(Trainee trainee) {
 
         logger.info("Creating trainee with id {}",
-                trainee.getUserId());
+                trainee.getId());
 
         String username =
                 userCredentialsGenerator.generateUsername(trainee);
@@ -56,7 +56,7 @@ public class TraineeService {
     public void updateTrainee(Trainee trainee) {
 
         logger.info("Updating trainee with id {}",
-                trainee.getUserId());
+                trainee.getId());
 
         traineeDao.updateTrainee(trainee);
 

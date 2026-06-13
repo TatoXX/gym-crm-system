@@ -49,7 +49,7 @@ public class GymFacade {
     public void updateTrainee(Trainee trainee) {
 
         logger.info("Facade request: update trainee with id {}",
-                trainee.getUserId());
+                trainee.getId());
 
         traineeService.updateTrainee(trainee);
     }
@@ -83,7 +83,7 @@ public class GymFacade {
     }
     public void updateTrainer(Trainer trainer) {
         logger.info("Facade request: update trainer with id {}",
-                trainer.getUserId());
+                trainer.getId());
 
         trainerService.updateTrainer(trainer);
     }

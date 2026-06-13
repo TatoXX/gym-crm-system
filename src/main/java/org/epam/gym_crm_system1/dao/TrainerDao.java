@@ -23,10 +23,10 @@ public class TrainerDao {
     public void saveTrainer(Trainer trainer) {
 
         logger.info("Saving trainer with id {}",
-                trainer.getUserId());
+                trainer.getId());
 
         storage.getTrainers()
-                .put(trainer.getUserId(), trainer);
+                .put(trainer.getId(), trainer);
 
         logger.info("Trainer saved successfully");
     }
@@ -34,10 +34,10 @@ public class TrainerDao {
     public void updateTrainer(Trainer trainer) {
 
         logger.info("Updating trainer with id {}",
-                trainer.getUserId());
+                trainer.getId());
 
         storage.getTrainers()
-                .put(trainer.getUserId(), trainer);
+                .put(trainer.getId(), trainer);
 
         logger.info("Trainer updated successfully");
     }

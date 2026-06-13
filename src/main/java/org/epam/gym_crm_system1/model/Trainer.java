@@ -1,41 +1,60 @@
 package org.epam.gym_crm_system1.model;
 
-public class Trainer extends User{
+import jakarta.persistence.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "trainers")
+public class Trainer extends User {
+
+    @ManyToOne
+    @JoinColumn(name = "training_type_id", nullable = false)
     private TrainingType trainingType;
-    private int userId;
 
-    public Trainer(){
+    @ManyToMany
+    @JoinTable(
+            name = "trainer_trainee",
+            joinColumns = @JoinColumn(name = "trainer_id"),
+            inverseJoinColumns = @JoinColumn(name = "trainee_id")
+    )
+    private Set<Trainee> trainees = new HashSet<>();
 
+    public Trainer() {
     }
-    public Trainer(String firstName, String lastName, TrainingType trainingType, int userId) {
+
+    public Trainer(String firstName, String lastName, TrainingType trainingType) {
         super(firstName, lastName, null, null, false);
-
         this.trainingType = trainingType;
-        this.userId = userId;
     }
 
-
-    public TrainingType getSpecialization() {
+    public TrainingType getTrainingType() {
         return trainingType;
     }
 
-    public void setSpecialization(TrainingType trainingType) {
+    public void setTrainingType(TrainingType trainingType) {
         this.trainingType = trainingType;
     }
 
-    public int getUserId() {
-        return userId;
+
+    public Set<Trainee> getTrainees() {
+        return trainees;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setTrainees(Set<Trainee> trainees) {
+        this.trainees = trainees;
     }
 
     @Override
     public String toString() {
         return "Trainer{" +
-                "specialization=" + trainingType +
-                ", userId=" + userId +
+                "id=" + getId() +
+                ", firstName='" + getFirstName() + '\'' +
+                ", lastName='" + getLastName() + '\'' +
+                ", userName='" + getUserName() + '\'' +
+                ", isActive=" + getIsActive() +
+                ", trainingType=" + trainingType +
                 '}';
     }
 }

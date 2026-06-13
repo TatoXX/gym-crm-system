@@ -88,9 +88,9 @@ public class StorageInitializer {
                         new Trainee(firstName,
                                 lastName,
                                 address,
-                                dateOfBirth,
-                                id);
+                                dateOfBirth);
 
+                trainee.setId(id);
                 trainee.setUserName(userName);
                 trainee.setPassword(password);
                 trainee.setIsActive(isActive);
@@ -135,9 +135,9 @@ public class StorageInitializer {
                 Trainer trainer =
                         new Trainer(firstName,
                                 lastName,
-                                new TrainingType(0, specializationName),
-                                id);
+                                new TrainingType(0, specializationName));
 
+                trainer.setId(id);
                 trainer.setUserName(userName);
                 trainer.setPassword(password);
                 trainer.setIsActive(isActive);
@@ -186,16 +186,31 @@ public class StorageInitializer {
                 int traineeId =
                         Integer.parseInt(data[6]);
 
+                Trainer trainer =
+                        storage.getTrainers().get(trainerId);
+
+                Trainee trainee =
+                        storage.getTrainees().get(traineeId);
+
+                if (trainer == null || trainee == null) {
+                    logger.warn(
+                            "Training with id {} was skipped because trainer or trainee was not found",
+                            trainingId
+                    );
+                    continue;
+                }
+
                 Training training =
                         new Training(
                                 trainingName,
                                 new TrainingType(0, specializationName),
                                 trainingDate,
                                 duration,
-                                trainerId,
-                                traineeId,
-                                trainingId
+                                trainer,
+                                trainee
                         );
+
+                training.setTrainingId(trainingId);
 
                 storage.getTrainings()
                         .put(trainingId, training);

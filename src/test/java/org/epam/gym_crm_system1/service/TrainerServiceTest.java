@@ -29,9 +29,10 @@ class TrainerServiceTest {
                 new Trainer(
                         "John",
                         "Smith",
-                        new TrainingType(1, "Fitness"),
-                        1
+                        new TrainingType(1, "Fitness")
                 );
+
+        trainer.setId(1);
 
         trainerService.createTrainer(trainer);
 

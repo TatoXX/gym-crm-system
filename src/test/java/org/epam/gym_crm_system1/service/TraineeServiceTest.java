@@ -31,9 +31,10 @@ class TraineeServiceTest {
                         "John",
                         "Smith",
                         "Tbilisi",
-                        LocalDate.of(2000, 1, 1),
-                        1
+                        LocalDate.of(2000, 1, 1)
                 );
+
+        trainee.setId(1);
 
         traineeService.createTrainee(trainee);
 

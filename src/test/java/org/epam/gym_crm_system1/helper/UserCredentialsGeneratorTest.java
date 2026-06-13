@@ -11,7 +11,6 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 public class UserCredentialsGeneratorTest {
 
     @Test
@@ -26,19 +25,23 @@ public class UserCredentialsGeneratorTest {
 
         Trainee existingTrainee =
                 new Trainee("John", "Smith", "Tbilisi",
-                        LocalDate.of(2000, 1, 1), 1);
+                        LocalDate.of(2000, 1, 1));
 
+        existingTrainee.setId(1);
         existingTrainee.setUserName("John.Smith");
         traineeDao.saveTrainee(existingTrainee);
 
         Trainee newTrainee =
                 new Trainee("John", "Smith", "Batumi",
-                        LocalDate.of(2001, 2, 2), 2);
+                        LocalDate.of(2001, 2, 2));
+
+        newTrainee.setId(2);
 
         String username = generator.generateUsername(newTrainee);
 
         assertEquals("John.Smith1", username);
     }
+
     @Test
     void shouldGenerateUsernameWhenNoDuplicateExists() {
         Storage storage = new Storage();
@@ -51,7 +54,9 @@ public class UserCredentialsGeneratorTest {
 
         Trainee trainee =
                 new Trainee("John", "Smith", "Tbilisi",
-                        LocalDate.of(2000, 1, 1), 1);
+                        LocalDate.of(2000, 1, 1));
+
+        trainee.setId(1);
 
         String username = generator.generateUsername(trainee);
 
@@ -70,19 +75,25 @@ public class UserCredentialsGeneratorTest {
 
         Trainee trainee1 =
                 new Trainee("John", "Smith", "Tbilisi",
-                        LocalDate.of(2000, 1, 1), 1);
+                        LocalDate.of(2000, 1, 1));
+
+        trainee1.setId(1);
         trainee1.setUserName("John.Smith");
         traineeDao.saveTrainee(trainee1);
 
         Trainee trainee2 =
                 new Trainee("John", "Smith", "Batumi",
-                        LocalDate.of(2001, 2, 2), 2);
+                        LocalDate.of(2001, 2, 2));
+
+        trainee2.setId(2);
         trainee2.setUserName("John.Smith1");
         traineeDao.saveTrainee(trainee2);
 
         Trainee newTrainee =
                 new Trainee("John", "Smith", "Kutaisi",
-                        LocalDate.of(2002, 3, 3), 3);
+                        LocalDate.of(2002, 3, 3));
+
+        newTrainee.setId(3);
 
         String username = generator.generateUsername(newTrainee);
 
@@ -100,14 +111,17 @@ public class UserCredentialsGeneratorTest {
                 new UserCredentialsGenerator(traineeDao, trainerDao);
 
         Trainer existingTrainer =
-                new Trainer("John", "Smith", null, 1);
+                new Trainer("John", "Smith", null);
 
+        existingTrainer.setId(1);
         existingTrainer.setUserName("John.Smith");
         trainerDao.saveTrainer(existingTrainer);
 
         Trainee newTrainee =
                 new Trainee("John", "Smith", "Tbilisi",
-                        LocalDate.of(2000, 1, 1), 2);
+                        LocalDate.of(2000, 1, 1));
+
+        newTrainee.setId(2);
 
         String username = generator.generateUsername(newTrainee);
 

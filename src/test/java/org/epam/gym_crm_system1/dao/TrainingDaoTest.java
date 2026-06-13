@@ -1,7 +1,9 @@
 package org.epam.gym_crm_system1.dao;
 
-import org.epam.gym_crm_system1.model.TrainingType;
+import org.epam.gym_crm_system1.model.Trainee;
+import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
+import org.epam.gym_crm_system1.model.TrainingType;
 import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
 
@@ -19,16 +21,36 @@ class TrainingDaoTest {
         TrainingDao trainingDao =
                 new TrainingDao(storage);
 
+        Trainer trainer =
+                new Trainer(
+                        "John",
+                        "Smith",
+                        new TrainingType(1, "Fitness")
+                );
+
+        trainer.setId(1);
+
+        Trainee trainee =
+                new Trainee(
+                        "Anna",
+                        "Brown",
+                        "Tbilisi",
+                        LocalDate.of(2000, 1, 1)
+                );
+
+        trainee.setId(1);
+
         Training training =
                 new Training(
                         "Morning Cardio",
                         new TrainingType(1, "Fitness"),
-                        LocalDate.of(2026,5,11),
+                        LocalDate.of(2026, 5, 11),
                         60,
-                        1,
-                        1,
-                        1
+                        trainer,
+                        trainee
                 );
+
+        training.setTrainingId(1);
 
         trainingDao.saveTraining(training);
 
