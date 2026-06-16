@@ -115,4 +115,25 @@ public class GymFacade {
 
         return trainingService.selectAllTrainings();
     }
+
+    public void deleteTraineeByUsername(String username) {
+
+        logger.info("Facade request: delete trainee by username");
+
+        traineeService.deleteTraineeByUsername(username);
+    }
+
+    public Trainee selectTraineeByUsername(String username) {
+
+        logger.info("Facade request: select trainee by username");
+
+        return traineeService.selectTraineeByUsername(username);
+    }
+
+    public Trainer selectTrainerByUsername(String username) {
+
+        logger.info("Facade request: select trainer by username");
+
+        return trainerService.selectTrainerByUsername(username);
+    }
 }

@@ -100,4 +100,6 @@ public class TraineeDao {
 
         logger.info("Trainee deleted successfully");
     }
+
+
 }
