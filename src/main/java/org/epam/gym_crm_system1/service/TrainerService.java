@@ -1,5 +1,6 @@
 package org.epam.gym_crm_system1.service;
 
+import org.epam.gym_crm_system1.dao.TrainingDao;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
@@ -7,11 +8,14 @@ import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
 import org.epam.gym_crm_system1.dao.TrainerDao;
 import org.epam.gym_crm_system1.model.Trainer;
+import org.epam.gym_crm_system1.model.Training;
+import org.epam.gym_crm_system1.validator.UserValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 @Service
@@ -22,16 +26,33 @@ public class TrainerService {
 
     private final TrainerDao trainerDao;
     private final UserCredentialsGenerator userCredentialsGenerator;
+    private final TrainingDao trainingDao;
+    private final UserValidator userValidator;
 
     public TrainerService(TrainerDao trainerDao,
-                          UserCredentialsGenerator userCredentialsGenerator) {
+                          TrainingDao trainingDao,
+                          UserCredentialsGenerator userCredentialsGenerator,
+                          UserValidator userValidator) {
 
+        this.userValidator = userValidator;
+        this.trainingDao = trainingDao;
         this.trainerDao = trainerDao;
         this.userCredentialsGenerator = userCredentialsGenerator;
     }
 
    @Transactional
     public void createTrainer(Trainer trainer) {
+
+       if (trainer == null) {
+           throw new ValidationException("Trainer is required");
+       }
+
+       userValidator.validateFirstName(trainer.getFirstName());
+       userValidator.validateLastName(trainer.getLastName());
+
+       if (trainer.getTrainingType() == null) {
+           throw new ValidationException("Training type is required");
+       }
 
         logger.info("Creating trainer with id {}",
                 trainer.getId());
@@ -62,6 +83,20 @@ public class TrainerService {
 
     @Transactional
     public void updateTrainer(Trainer trainer) {
+
+        if (trainer == null) {
+            throw new ValidationException("Trainer is required");
+        }
+
+        userValidator.validateId(trainer.getId());
+        userValidator.validateFirstName(trainer.getFirstName());
+        userValidator.validateLastName(trainer.getLastName());
+        userValidator.validateUsername(trainer.getUserName());
+        userValidator.validatePassword(trainer.getPassword());
+
+        if (trainer.getTrainingType() == null) {
+            throw new ValidationException("Training type is required");
+        }
 
         logger.info("Updating trainer with id {}",
                 trainer.getId());
@@ -189,5 +224,40 @@ public class TrainerService {
         }
 
         return trainer;
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Training> getTrainerTrainingsByCriteria(
+            String trainerUsername,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String traineeName
+    ) {
+
+        if (trainerUsername == null || trainerUsername.isBlank()) {
+            throw new ValidationException("Trainer username is required");
+        }
+
+        trainerUsername = trainerUsername.trim();
+
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new ValidationException("From date cannot be after to date");
+        }
+
+        Trainer trainer =
+                trainerDao.findTrainerByUsername(trainerUsername);
+
+        if (trainer == null) {
+            throw new EntityNotFoundException("Trainer not found");
+        }
+
+        logger.info("Getting trainings for trainer username {}", trainerUsername);
+
+        return trainingDao.findTrainingsByTrainerUsernameAndCriteria(
+                trainerUsername,
+                fromDate,
+                toDate,
+                traineeName
+        );
     }
 }

@@ -6,12 +6,18 @@ import org.epam.gym_crm_system1.dao.TrainerDao;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
+import org.epam.gym_crm_system1.exception.ValidationException;
+import org.epam.gym_crm_system1.model.Trainee;
+import org.epam.gym_crm_system1.model.Training;
 import org.epam.gym_crm_system1.model.TrainingType;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -305,4 +311,154 @@ class TrainerServiceTest {
                 () -> trainerService.selectTrainerByUsername("Unknown.User")
         );
     }
+
+    @Test
+    void shouldGetTrainerTrainingsByCriteria() {
+
+        TrainingType fitness =
+                new TrainingType("FitnessTrainerCriteria");
+
+        TrainingType yoga =
+                new TrainingType("YogaTrainerCriteria");
+
+        entityManager.persist(fitness);
+        entityManager.persist(yoga);
+
+        Trainer trainer =
+                new Trainer(
+                        "Alex",
+                        "Stone",
+                        fitness
+                );
+
+        trainerService.createTrainer(trainer);
+
+        Trainee trainee1 =
+                new Trainee(
+                        "Anna",
+                        "Brown",
+                        "Tbilisi",
+                        LocalDate.of(2000, 1, 1)
+                );
+
+        trainee1.setUserName("Anna.Brown");
+        trainee1.setPassword("password123");
+        trainee1.setIsActive(true);
+
+        entityManager.persist(trainee1);
+
+        Trainee trainee2 =
+                new Trainee(
+                        "Nino",
+                        "Green",
+                        "Batumi",
+                        LocalDate.of(2001, 2, 2)
+                );
+
+        trainee2.setUserName("Nino.Green");
+        trainee2.setPassword("password123");
+        trainee2.setIsActive(true);
+
+        entityManager.persist(trainee2);
+
+        Training training1 =
+                new Training(
+                        "Morning Cardio",
+                        fitness,
+                        LocalDate.of(2026, 5, 10),
+                        60,
+                        trainer,
+                        trainee1
+                );
+
+        Training training2 =
+                new Training(
+                        "Evening Yoga",
+                        yoga,
+                        LocalDate.of(2026, 5, 20),
+                        45,
+                        trainer,
+                        trainee2
+                );
+
+        entityManager.persist(training1);
+        entityManager.persist(training2);
+
+        Collection<Training> trainings =
+                trainerService.getTrainerTrainingsByCriteria(
+                        trainer.getUserName(),
+                        LocalDate.of(2026, 5, 1),
+                        LocalDate.of(2026, 5, 15),
+                        "Anna"
+                );
+
+        assertEquals(1, trainings.size());
+
+        Training foundTraining =
+                trainings.iterator().next();
+
+        assertEquals("Morning Cardio",
+                foundTraining.getTrainingName());
+
+        assertEquals("Anna",
+                foundTraining.getTrainee().getFirstName());
+    }
+
+
+    @Test
+    void shouldThrowExceptionWhenTrainerTrainingFromDateIsAfterToDate() {
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainerService.getTrainerTrainingsByCriteria(
+                        "Alex.Stone",
+                        LocalDate.of(2026, 6, 1),
+                        LocalDate.of(2026, 5, 1),
+                        null
+                )
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCreatingTrainerWithoutTrainingType() {
+
+        Trainer trainer =
+                new Trainer(
+                        "John",
+                        "Smith",
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainerService.createTrainer(trainer)
+        );
+    }
+
+
+    @Test
+    void shouldThrowExceptionWhenUpdatingTrainerWithInvalidPassword() {
+
+        TrainingType fitness =
+                new TrainingType("FitnessTrainerValidation");
+
+        entityManager.persist(fitness);
+
+        Trainer trainer =
+                new Trainer(
+                        "John",
+                        "Trainer",
+                        fitness
+                );
+
+        trainerService.createTrainer(trainer);
+
+        trainer.setPassword(" ");
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainerService.updateTrainer(trainer)
+        );
+    }
+    
 }

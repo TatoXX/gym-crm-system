@@ -3,6 +3,7 @@ package org.epam.gym_crm_system1.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.dao.TrainingDao;
+import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -85,4 +86,63 @@ class TrainingServiceTest {
         assertEquals(trainer.getId(), savedTraining.getTrainer().getId());
         assertEquals(trainee.getId(), savedTraining.getTrainee().getId());
     }
+
+    @Test
+    void shouldThrowExceptionWhenTrainingNameIsBlank() {
+
+        Training training =
+                new Training(
+                        " ",
+                        null,
+                        LocalDate.of(2026, 5, 11),
+                        60,
+                        null,
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainingService.createTraining(training)
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrainingDateIsNull() {
+
+        Training training =
+                new Training(
+                        "Morning Cardio",
+                        null,
+                        null,
+                        60,
+                        null,
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainingService.createTraining(training)
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrainingDurationIsNotPositive() {
+
+        Training training =
+                new Training(
+                        "Morning Cardio",
+                        null,
+                        LocalDate.of(2026, 5, 11),
+                        0,
+                        null,
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainingService.createTraining(training)
+        );
+    }
+
+
 }

@@ -81,4 +81,25 @@ public class TrainerDao {
                 .createQuery("SELECT t FROM Trainer t", Trainer.class)
                 .getResultList();
     }
+
+    public Collection<Trainer> findTrainersNotAssignedToTrainee(
+            String traineeUsername
+    ) {
+
+        logger.info("Finding trainers not assigned to trainee username {}",
+                traineeUsername);
+
+        return entityManager
+                .createQuery(
+                        "SELECT trainer FROM Trainer trainer " +
+                                "WHERE trainer NOT IN (" +
+                                "SELECT assignedTrainer FROM Trainee trainee " +
+                                "JOIN trainee.trainers assignedTrainer " +
+                                "WHERE trainee.userName = :traineeUsername" +
+                                ")",
+                        Trainer.class
+                )
+                .setParameter("traineeUsername", traineeUsername)
+                .getResultList();
+    }
 }

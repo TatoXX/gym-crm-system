@@ -1,9 +1,14 @@
 package org.epam.gym_crm_system1.service;
 
+import org.epam.gym_crm_system1.validator.UserValidator;
+import org.epam.gym_crm_system1.dao.TrainerDao;
+import org.epam.gym_crm_system1.dao.TrainingDao;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
 import org.epam.gym_crm_system1.exception.ValidationException;
+import org.epam.gym_crm_system1.model.Trainer;
+import org.epam.gym_crm_system1.model.Training;
 import org.springframework.transaction.annotation.Transactional;
 import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
 import org.epam.gym_crm_system1.dao.TraineeDao;
@@ -12,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 @Service
@@ -20,18 +26,34 @@ public class TraineeService {
     private static final Logger logger =
             LoggerFactory.getLogger(TraineeService.class);
 
+    private final TrainerDao trainerDao;
     private final TraineeDao traineeDao;
+    private final TrainingDao trainingDao;
     private final UserCredentialsGenerator userCredentialsGenerator;
+    private final UserValidator userValidator;
 
     public TraineeService(TraineeDao traineeDao,
-                          UserCredentialsGenerator userCredentialsGenerator) {
+                          TrainingDao trainingDao,
+                          TrainerDao trainerDao,
+                          UserCredentialsGenerator userCredentialsGenerator,
+                          UserValidator userValidator) {
 
         this.traineeDao = traineeDao;
+        this.trainingDao = trainingDao;
+        this.trainerDao = trainerDao;
         this.userCredentialsGenerator = userCredentialsGenerator;
+        this.userValidator = userValidator;
     }
 
     @Transactional
     public void createTrainee(Trainee trainee) {
+
+        if (trainee == null) {
+            throw new ValidationException("Trainee is required");
+        }
+
+        userValidator.validateFirstName(trainee.getFirstName());
+        userValidator.validateLastName(trainee.getLastName());
 
         logger.info("Creating trainee with id {}",
                 trainee.getId());
@@ -62,6 +84,15 @@ public class TraineeService {
 
     @Transactional
     public void updateTrainee(Trainee trainee) {
+        if (trainee == null) {
+            throw new ValidationException("Trainee is required");
+        }
+
+        userValidator.validateId(trainee.getId());
+        userValidator.validateFirstName(trainee.getFirstName());
+        userValidator.validateLastName(trainee.getLastName());
+        userValidator.validateUsername(trainee.getUserName());
+        userValidator.validatePassword(trainee.getPassword());
 
         logger.info("Updating trainee with id {}",
                 trainee.getId());
@@ -226,5 +257,122 @@ public class TraineeService {
 
         return trainee;
     }
+
+    @Transactional(readOnly = true)
+    public Collection<Training> getTraineeTrainingsByCriteria(
+            String traineeUsername,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String trainerUsername,
+            String trainingTypeName
+    ) {
+
+        if (traineeUsername == null || traineeUsername.isBlank()) {
+            throw new ValidationException("Trainee username is required");
+        }
+
+        traineeUsername = traineeUsername.trim();
+
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new ValidationException("From date cannot be after to date");
+        }
+
+        Trainee trainee =
+                traineeDao.findTraineeByUsername(traineeUsername);
+
+        if (trainee == null) {
+            throw new EntityNotFoundException("Trainee not found");
+        }
+
+        logger.info("Getting trainings for trainee username {}", traineeUsername);
+
+        return trainingDao.findTrainingsByTraineeUsernameAndCriteria(
+                traineeUsername,
+                fromDate,
+                toDate,
+                trainerUsername,
+                trainingTypeName
+        );
+    }
+
+
+    @Transactional(readOnly = true)
+    public Collection<Trainer> getTrainersNotAssignedToTrainee(
+            String traineeUsername
+    ) {
+
+        if (traineeUsername == null || traineeUsername.isBlank()) {
+            throw new ValidationException("Trainee username is required");
+        }
+
+        traineeUsername = traineeUsername.trim();
+
+        Trainee trainee =
+                traineeDao.findTraineeByUsername(traineeUsername);
+
+        if (trainee == null) {
+            throw new EntityNotFoundException("Trainee not found");
+        }
+
+        logger.info("Getting trainers not assigned to trainee username {}",
+                traineeUsername);
+
+        return trainerDao.findTrainersNotAssignedToTrainee(
+                traineeUsername
+        );
+    }
+
+
+    @Transactional
+    public void updateTraineeTrainersList(String traineeUsername,
+                                          Collection<String> trainerUsernames) {
+
+        if (traineeUsername == null || traineeUsername.isBlank()) {
+            throw new ValidationException("Trainee username is required");
+        }
+
+        if (trainerUsernames == null) {
+            throw new ValidationException("Trainer usernames are required");
+        }
+
+        traineeUsername = traineeUsername.trim();
+
+        Trainee trainee =
+                traineeDao.findTraineeByUsername(traineeUsername);
+
+        if (trainee == null) {
+            throw new EntityNotFoundException("Trainee not found");
+        }
+
+        for (Trainer oldTrainer : trainee.getTrainers()) {
+            oldTrainer.getTrainees().remove(trainee);
+        }
+
+        trainee.getTrainers().clear();
+
+        for (String trainerUsername : trainerUsernames) {
+
+            if (trainerUsername == null || trainerUsername.isBlank()) {
+                throw new ValidationException("Trainer username is required");
+            }
+
+            Trainer trainer =
+                    trainerDao.findTrainerByUsername(trainerUsername.trim());
+
+            if (trainer == null) {
+                throw new EntityNotFoundException("Trainer not found");
+            }
+
+            trainee.getTrainers().add(trainer);
+            trainer.getTrainees().add(trainee);
+        }
+
+        traineeDao.updateTrainee(trainee);
+
+        logger.info("Trainee trainers list updated successfully");
+    }
+
+
+
     
 }
