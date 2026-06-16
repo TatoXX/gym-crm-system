@@ -1,22 +1,24 @@
 package org.epam.gym_crm_system1.dao;
 
 import org.epam.gym_crm_system1.model.Trainee;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class TraineeDaoTest {
+
+    @Autowired
+    private TraineeDao traineeDao;
 
     @Test
     void shouldSaveTrainee() {
-
-        Storage storage = new Storage();
-
-        TraineeDao traineeDao =
-                new TraineeDao(storage);
 
         Trainee trainee =
                 new Trainee(
@@ -26,22 +28,30 @@ class TraineeDaoTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        trainee.setId(1);
+        trainee.setUserName("John.Smith");
+        trainee.setPassword("password123");
+        trainee.setIsActive(true);
 
         traineeDao.saveTrainee(trainee);
 
-        assertEquals(trainee,
-                traineeDao.findTraineeById(1));
+        Trainee savedTrainee =
+                traineeDao.findTraineeById(trainee.getId());
+
+        assertNotNull(savedTrainee);
+
+        assertEquals("John",
+                savedTrainee.getFirstName());
+
+        assertEquals("Smith",
+                savedTrainee.getLastName());
+
+        assertEquals("Tbilisi",
+                savedTrainee.getAddress());
     }
 
     @Test
     void shouldUpdateTrainee() {
 
-        Storage storage = new Storage();
-
-        TraineeDao traineeDao =
-                new TraineeDao(storage);
-
         Trainee trainee =
                 new Trainee(
                         "John",
@@ -50,7 +60,9 @@ class TraineeDaoTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        trainee.setId(1);
+        trainee.setUserName("John.Smith");
+        trainee.setPassword("password123");
+        trainee.setIsActive(true);
 
         traineeDao.saveTrainee(trainee);
 
@@ -58,17 +70,17 @@ class TraineeDaoTest {
 
         traineeDao.updateTrainee(trainee);
 
+        Trainee updatedTrainee =
+                traineeDao.findTraineeById(trainee.getId());
+
+        assertNotNull(updatedTrainee);
+
         assertEquals("Batumi",
-                traineeDao.findTraineeById(1).getAddress());
+                updatedTrainee.getAddress());
     }
 
     @Test
     void shouldDeleteTrainee() {
-
-        Storage storage = new Storage();
-
-        TraineeDao traineeDao =
-                new TraineeDao(storage);
 
         Trainee trainee =
                 new Trainee(
@@ -78,12 +90,18 @@ class TraineeDaoTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        trainee.setId(1);
+        trainee.setUserName("John.Smith");
+        trainee.setPassword("password123");
+        trainee.setIsActive(true);
 
         traineeDao.saveTrainee(trainee);
 
-        traineeDao.deleteTraineeById(1);
+        int traineeId = trainee.getId();
 
-        assertNull(traineeDao.findTraineeById(1));
+        traineeDao.deleteTraineeById(traineeId);
+
+        assertNull(
+                traineeDao.findTraineeById(traineeId)
+        );
     }
 }

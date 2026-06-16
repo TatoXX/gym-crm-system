@@ -14,7 +14,6 @@ public class Trainee extends User {
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
-
     @Column(name = "address")
     private String address;
 

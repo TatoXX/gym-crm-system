@@ -1,30 +1,28 @@
 package org.epam.gym_crm_system1.service;
 
 import org.epam.gym_crm_system1.dao.TraineeDao;
-import org.epam.gym_crm_system1.dao.TrainerDao;
-import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
 import org.epam.gym_crm_system1.model.Trainee;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class TraineeServiceTest {
+
+    @Autowired
+    private TraineeService traineeService;
+
+    @Autowired
+    private TraineeDao traineeDao;
 
     @Test
     void shouldCreateTrainee() {
-        Storage storage = new Storage();
-
-        TraineeDao traineeDao = new TraineeDao(storage);
-        TrainerDao trainerDao = new TrainerDao(storage);
-
-        UserCredentialsGenerator generator =
-                new UserCredentialsGenerator(traineeDao, trainerDao);
-
-        TraineeService traineeService =
-                new TraineeService(traineeDao, generator);
 
         Trainee trainee =
                 new Trainee(
@@ -34,12 +32,10 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        trainee.setId(1);
-
         traineeService.createTrainee(trainee);
 
         Trainee savedTrainee =
-                traineeDao.findTraineeById(1);
+                traineeDao.findTraineeById(trainee.getId());
 
         assertNotNull(savedTrainee);
         assertEquals("John.Smith", savedTrainee.getUserName());

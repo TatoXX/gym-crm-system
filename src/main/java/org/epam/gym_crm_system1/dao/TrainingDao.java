@@ -1,7 +1,8 @@
 package org.epam.gym_crm_system1.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.model.Training;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -14,19 +15,15 @@ public class TrainingDao {
     private static final Logger logger =
             LoggerFactory.getLogger(TrainingDao.class);
 
-    private final Storage storage;
-
-    public TrainingDao(Storage storage) {
-        this.storage = storage;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void saveTraining(Training training) {
 
         logger.info("Saving training with id {}",
                 training.getTrainingId());
 
-        storage.getTrainings()
-                .put(training.getTrainingId(), training);
+        entityManager.persist(training);
 
         logger.info("Training saved successfully");
     }
@@ -37,10 +34,9 @@ public class TrainingDao {
                 trainingId);
 
         Training training =
-                storage.getTrainings().get(trainingId);
+                entityManager.find(Training.class, trainingId);
 
         if (training == null) {
-
             logger.warn("Training with id {} not found",
                     trainingId);
         }
@@ -52,6 +48,8 @@ public class TrainingDao {
 
         logger.info("Finding all trainings");
 
-        return storage.getTrainings().values();
+        return entityManager
+                .createQuery("SELECT t FROM Training t", Training.class)
+                .getResultList();
     }
 }

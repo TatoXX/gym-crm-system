@@ -1,31 +1,41 @@
 package org.epam.gym_crm_system1.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.dao.TrainingDao;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
 import org.epam.gym_crm_system1.model.TrainingType;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class TrainingServiceTest {
+
+    @Autowired
+    private TrainingService trainingService;
+
+    @Autowired
+    private TrainingDao trainingDao;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void shouldCreateTraining() {
-        Storage storage = new Storage();
-
-        TrainingDao trainingDao =
-                new TrainingDao(storage);
-
-        TrainingService trainingService =
-                new TrainingService(trainingDao);
 
         TrainingType trainingType =
-                new TrainingType(1, "Fitness");
+                new TrainingType("FitnessTrainingService");
+
+        entityManager.persist(trainingType);
 
         Trainer trainer =
                 new Trainer(
@@ -34,7 +44,11 @@ class TrainingServiceTest {
                         trainingType
                 );
 
-        trainer.setId(1);
+        trainer.setUserName("John.Smith");
+        trainer.setPassword("password123");
+        trainer.setIsActive(true);
+
+        entityManager.persist(trainer);
 
         Trainee trainee =
                 new Trainee(
@@ -44,7 +58,11 @@ class TrainingServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        trainee.setId(1);
+        trainee.setUserName("Anna.Brown");
+        trainee.setPassword("password123");
+        trainee.setIsActive(true);
+
+        entityManager.persist(trainee);
 
         Training training =
                 new Training(
@@ -56,17 +74,15 @@ class TrainingServiceTest {
                         trainee
                 );
 
-        training.setTrainingId(1);
-
         trainingService.createTraining(training);
 
         Training savedTraining =
-                trainingDao.getTrainingById(1);
+                trainingDao.getTrainingById(training.getTrainingId());
 
         assertNotNull(savedTraining);
         assertEquals("Morning Cardio", savedTraining.getTrainingName());
         assertEquals(60, savedTraining.getTrainingDurationMinutes());
-        assertEquals(1, savedTraining.getTrainer().getId());
-        assertEquals(1, savedTraining.getTrainee().getId());
+        assertEquals(trainer.getId(), savedTraining.getTrainer().getId());
+        assertEquals(trainee.getId(), savedTraining.getTrainee().getId());
     }
 }

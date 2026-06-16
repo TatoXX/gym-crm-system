@@ -6,6 +6,7 @@ import org.epam.gym_crm_system1.model.Trainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -25,6 +26,7 @@ public class TrainerService {
         this.userCredentialsGenerator = userCredentialsGenerator;
     }
 
+   @Transactional
     public void createTrainer(Trainer trainer) {
 
         logger.info("Creating trainer with id {}",
@@ -46,6 +48,7 @@ public class TrainerService {
                 trainer.getUserName());
     }
 
+    @Transactional(readOnly = true)
     public Trainer selectTrainerById(int id) {
 
         logger.info("Selecting trainer with id {}", id);
@@ -53,6 +56,7 @@ public class TrainerService {
         return trainerDao.getTrainerById(id);
     }
 
+    @Transactional
     public void updateTrainer(Trainer trainer) {
 
         logger.info("Updating trainer with id {}",
@@ -62,7 +66,7 @@ public class TrainerService {
 
         logger.info("Trainer updated successfully");
     }
-
+    @Transactional(readOnly = true)
     public Collection<Trainer> selectAllTrainers() {
 
         logger.info("Selecting all trainers");

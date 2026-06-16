@@ -1,34 +1,50 @@
 package org.epam.gym_crm_system1.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
 import org.epam.gym_crm_system1.model.TrainingType;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class TrainingDaoTest {
+
+    @Autowired
+    private TrainingDao trainingDao;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void shouldSaveTraining() {
 
-        Storage storage = new Storage();
+        TrainingType trainingType =
+                new TrainingType("FitnessTrainingDao");
 
-        TrainingDao trainingDao =
-                new TrainingDao(storage);
+        entityManager.persist(trainingType);
 
         Trainer trainer =
                 new Trainer(
                         "John",
                         "Smith",
-                        new TrainingType(1, "Fitness")
+                        trainingType
                 );
 
-        trainer.setId(1);
+        trainer.setUserName("John.Smith");
+        trainer.setPassword("password123");
+        trainer.setIsActive(true);
+
+        entityManager.persist(trainer);
 
         Trainee trainee =
                 new Trainee(
@@ -38,23 +54,31 @@ class TrainingDaoTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        trainee.setId(1);
+        trainee.setUserName("Anna.Brown");
+        trainee.setPassword("password123");
+        trainee.setIsActive(true);
+
+        entityManager.persist(trainee);
 
         Training training =
                 new Training(
                         "Morning Cardio",
-                        new TrainingType(1, "Fitness"),
+                        trainingType,
                         LocalDate.of(2026, 5, 11),
                         60,
                         trainer,
                         trainee
                 );
 
-        training.setTrainingId(1);
-
         trainingDao.saveTraining(training);
 
-        assertEquals(training,
-                trainingDao.getTrainingById(1));
+        Training savedTraining =
+                trainingDao.getTrainingById(training.getTrainingId());
+
+        assertNotNull(savedTraining);
+        assertEquals("Morning Cardio", savedTraining.getTrainingName());
+        assertEquals(60, savedTraining.getTrainingDurationMinutes());
+        assertEquals(trainer.getId(), savedTraining.getTrainer().getId());
+        assertEquals(trainee.getId(), savedTraining.getTrainee().getId());
     }
 }

@@ -1,7 +1,9 @@
 package org.epam.gym_crm_system1.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.model.Trainer;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -14,19 +16,15 @@ public class TrainerDao {
     private static final Logger logger =
             LoggerFactory.getLogger(TrainerDao.class);
 
-    private final Storage storage;
-
-    public TrainerDao(Storage storage) {
-        this.storage = storage;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void saveTrainer(Trainer trainer) {
 
         logger.info("Saving trainer with id {}",
                 trainer.getId());
 
-        storage.getTrainers()
-                .put(trainer.getId(), trainer);
+        entityManager.persist(trainer);
 
         logger.info("Trainer saved successfully");
     }
@@ -36,8 +34,7 @@ public class TrainerDao {
         logger.info("Updating trainer with id {}",
                 trainer.getId());
 
-        storage.getTrainers()
-                .put(trainer.getId(), trainer);
+        entityManager.merge(trainer);
 
         logger.info("Trainer updated successfully");
     }
@@ -47,10 +44,9 @@ public class TrainerDao {
         logger.info("Finding trainer with id {}", trainerId);
 
         Trainer trainer =
-                storage.getTrainers().get(trainerId);
+                entityManager.find(Trainer.class, trainerId);
 
         if (trainer == null) {
-
             logger.warn("Trainer with id {} not found",
                     trainerId);
         }
@@ -58,10 +54,31 @@ public class TrainerDao {
         return trainer;
     }
 
+    public Trainer findTrainerByUsername(String username) {
+
+        logger.info("Finding trainer with username {}", username);
+
+        try {
+            return entityManager
+                    .createQuery(
+                            "SELECT t FROM Trainer t WHERE t.userName = :username",
+                            Trainer.class
+                    )
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+        } catch (NoResultException e) {
+            logger.warn("Trainer with username {} not found", username);
+            return null;
+        }
+    }
+
     public Collection<Trainer> getAllTrainers() {
 
         logger.info("Finding all trainers");
 
-        return storage.getTrainers().values();
+        return entityManager
+                .createQuery("SELECT t FROM Trainer t", Trainer.class)
+                .getResultList();
     }
 }

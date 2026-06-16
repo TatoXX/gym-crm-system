@@ -1,65 +1,90 @@
 package org.epam.gym_crm_system1.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.model.TrainingType;
 import org.epam.gym_crm_system1.model.Trainer;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class TrainerDaoTest {
+
+    @Autowired
+    private TrainerDao trainerDao;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void shouldSaveTrainer() {
 
-        Storage storage = new Storage();
+        TrainingType trainingType =
+                new TrainingType("FitnessDaoSave");
 
-        TrainerDao trainerDao =
-                new TrainerDao(storage);
+        entityManager.persist(trainingType);
 
         Trainer trainer =
                 new Trainer(
                         "John",
                         "Smith",
-                        new TrainingType(1, "Fitness")
+                        trainingType
                 );
 
-        trainer.setId(1);
+        trainer.setUserName("John.Smith");
+        trainer.setPassword("password123");
+        trainer.setIsActive(true);
 
         trainerDao.saveTrainer(trainer);
 
-        assertEquals(trainer,
-                trainerDao.getTrainerById(1));
+        Trainer savedTrainer =
+                trainerDao.getTrainerById(trainer.getId());
+
+        assertNotNull(savedTrainer);
+        assertEquals("John", savedTrainer.getFirstName());
+        assertEquals("FitnessDaoSave",
+                savedTrainer.getTrainingType().getName());
     }
 
     @Test
     void shouldUpdateTrainer() {
 
-        Storage storage = new Storage();
+        TrainingType fitness =
+                new TrainingType("FitnessDaoUpdate");
 
-        TrainerDao trainerDao =
-                new TrainerDao(storage);
+        TrainingType yoga =
+                new TrainingType("YogaDaoUpdate");
+
+        entityManager.persist(fitness);
+        entityManager.persist(yoga);
 
         Trainer trainer =
                 new Trainer(
                         "John",
                         "Smith",
-                        new TrainingType(1, "Fitness")
+                        fitness
                 );
 
-        trainer.setId(1);
+        trainer.setUserName("John.Smith");
+        trainer.setPassword("password123");
+        trainer.setIsActive(true);
 
         trainerDao.saveTrainer(trainer);
 
-        trainer.setTrainingType(
-                new TrainingType(2, "Yoga")
-        );
+        trainer.setTrainingType(yoga);
 
         trainerDao.updateTrainer(trainer);
 
-        assertEquals("Yoga",
-                trainerDao.getTrainerById(1)
-                        .getTrainingType()
-                        .getName());
+        Trainer updatedTrainer =
+                trainerDao.getTrainerById(trainer.getId());
+
+        assertNotNull(updatedTrainer);
+        assertEquals("YogaDaoUpdate",
+                updatedTrainer.getTrainingType().getName());
     }
 }

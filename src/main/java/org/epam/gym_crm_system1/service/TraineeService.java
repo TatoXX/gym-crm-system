@@ -1,5 +1,6 @@
 package org.epam.gym_crm_system1.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
 import org.epam.gym_crm_system1.dao.TraineeDao;
 import org.epam.gym_crm_system1.model.Trainee;
@@ -25,6 +26,7 @@ public class TraineeService {
         this.userCredentialsGenerator = userCredentialsGenerator;
     }
 
+    @Transactional
     public void createTrainee(Trainee trainee) {
 
         logger.info("Creating trainee with id {}",
@@ -46,6 +48,7 @@ public class TraineeService {
                 trainee.getUserName());
     }
 
+    @Transactional(readOnly = true)
     public Trainee selectTraineeById(int id) {
 
         logger.info("Selecting trainee with id {}", id);
@@ -53,6 +56,7 @@ public class TraineeService {
         return traineeDao.findTraineeById(id);
     }
 
+    @Transactional
     public void updateTrainee(Trainee trainee) {
 
         logger.info("Updating trainee with id {}",
@@ -63,6 +67,7 @@ public class TraineeService {
         logger.info("Trainee updated successfully");
     }
 
+    @Transactional
     public void deleteTraineeById(int id) {
 
         logger.info("Deleting trainee with id {}", id);
@@ -72,6 +77,8 @@ public class TraineeService {
         logger.info("Trainee deleted successfully");
     }
 
+
+    @Transactional(readOnly = true)
     public Collection<Trainee> selectAllTrainees() {
 
         logger.info("Selecting all trainees");

@@ -5,6 +5,7 @@ import org.epam.gym_crm_system1.model.Training;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -20,6 +21,7 @@ public class TrainingService {
         this.trainingDao = trainingDao;
     }
 
+    @Transactional
     public void createTraining(Training training) {
 
         logger.info("Creating training with id {}",
@@ -30,6 +32,7 @@ public class TrainingService {
         logger.info("Training created successfully");
     }
 
+    @Transactional(readOnly = true)
     public Training selectTrainingById(int id) {
 
         logger.info("Selecting training with id {}", id);
@@ -37,6 +40,7 @@ public class TrainingService {
         return trainingDao.getTrainingById(id);
     }
 
+    @Transactional(readOnly = true)
     public Collection<Training> selectAllTrainings() {
 
         logger.info("Selecting all trainings");

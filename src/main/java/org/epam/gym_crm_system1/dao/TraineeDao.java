@@ -1,7 +1,9 @@
 package org.epam.gym_crm_system1.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.model.Trainee;
-import org.epam.gym_crm_system1.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -14,62 +16,87 @@ public class TraineeDao {
     private static final Logger logger =
             LoggerFactory.getLogger(TraineeDao.class);
 
-    private final Storage storage;
-
-    public TraineeDao(Storage storage) {
-        this.storage = storage;
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void saveTrainee(Trainee trainee) {
 
         logger.info("Saving trainee with id {}",
                 trainee.getId());
 
-        storage.getTrainees()
-                .put(trainee.getId(), trainee);
+        entityManager.persist(trainee);
 
         logger.info("Trainee saved successfully");
     }
 
-    public Trainee findTraineeById(int userId) {
+    public Trainee findTraineeById(int id) {
 
-        logger.info("Finding trainee with id {}", userId);
+        logger.info("Finding trainee with id {}", id);
 
         Trainee trainee =
-                storage.getTrainees().get(userId);
+                entityManager.find(Trainee.class, id);
 
         if (trainee == null) {
-
-            logger.warn("Trainee with id {} not found",
-                    userId);
+            logger.warn("Trainee with id {} not found", id);
         }
 
         return trainee;
+    }
+
+    public Trainee findTraineeByUsername(String username) {
+
+        logger.info("Finding trainee with username {}", username);
+
+        try {
+            return entityManager
+                    .createQuery(
+                            "SELECT t FROM Trainee t WHERE t.userName = :username",
+                            Trainee.class
+                    )
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+        } catch (NoResultException e) {
+            logger.warn("Trainee with username {} not found", username);
+            return null;
+        }
     }
 
     public Collection<Trainee> findAllTrainees() {
 
         logger.info("Finding all trainees");
 
-        return storage.getTrainees().values();
+        return entityManager
+                .createQuery("SELECT t FROM Trainee t", Trainee.class)
+                .getResultList();
     }
 
-    public void updateTrainee(Trainee trainee) {
+    public Trainee updateTrainee(Trainee trainee) {
 
         logger.info("Updating trainee with id {}",
                 trainee.getId());
 
-        storage.getTrainees()
-                .put(trainee.getId(), trainee);
+        Trainee updatedTrainee =
+                entityManager.merge(trainee);
 
         logger.info("Trainee updated successfully");
+
+        return updatedTrainee;
     }
 
     public void deleteTraineeById(int id) {
 
         logger.info("Deleting trainee with id {}", id);
 
-        storage.getTrainees().remove(id);
+        Trainee trainee =
+                entityManager.find(Trainee.class, id);
+
+        if (trainee == null) {
+            logger.warn("Trainee with id {} not found, delete skipped", id);
+            return;
+        }
+
+        entityManager.remove(trainee);
 
         logger.info("Trainee deleted successfully");
     }
