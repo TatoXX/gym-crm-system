@@ -43,4 +43,49 @@ class TraineeServiceTest {
         assertEquals(10, savedTrainee.getPassword().length());
         assertTrue(savedTrainee.getIsActive());
     }
+
+    @Test
+    void shouldValidateTraineeCredentials() {
+
+        Trainee trainee =
+                new Trainee(
+                        "John",
+                        "Smith",
+                        "Tbilisi",
+                        LocalDate.of(2000, 1, 1)
+                );
+
+        traineeService.createTrainee(trainee);
+
+        boolean result =
+                traineeService.isTraineeCredentialsValid(
+                        trainee.getUserName(),
+                        trainee.getPassword()
+                );
+
+        assertTrue(result);
+    }
+
+    @Test
+    void shouldReturnFalseWhenTraineePasswordIsWrong() {
+
+        Trainee trainee =
+                new Trainee(
+                        "John",
+                        "Smith",
+                        "Tbilisi",
+                        LocalDate.of(2000, 1, 1)
+                );
+
+        traineeService.createTrainee(trainee);
+
+        boolean result =
+                traineeService.isTraineeCredentialsValid(
+                        trainee.getUserName(),
+                        "wrongPassword"
+                );
+
+        assertFalse(result);
+    }
+
 }

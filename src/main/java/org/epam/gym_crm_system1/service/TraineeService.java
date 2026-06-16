@@ -85,4 +85,20 @@ public class TraineeService {
 
         return traineeDao.findAllTrainees();
     }
+
+    @Transactional(readOnly = true)
+    public boolean isTraineeCredentialsValid(String username, String password) {
+
+        logger.info("Checking trainee credentials for username {}", username);
+
+        Trainee trainee =
+                traineeDao.findTraineeByUsername(username);
+
+        if (trainee == null) {
+            logger.warn("Trainee with username {} not found", username);
+            return false;
+        }
+
+        return trainee.getPassword().equals(password);
+    }
 }

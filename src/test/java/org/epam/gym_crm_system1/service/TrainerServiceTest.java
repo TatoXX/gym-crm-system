@@ -53,4 +53,56 @@ class TrainerServiceTest {
         assertEquals("FitnessTrainerService",
                 savedTrainer.getTrainingType().getName());
     }
+
+    @Test
+    void shouldValidateTrainerCredentials() {
+
+        TrainingType trainingType =
+                new TrainingType("FitnessCredentialTest");
+
+        entityManager.persist(trainingType);
+
+        Trainer trainer =
+                new Trainer(
+                        "John",
+                        "Smith",
+                        trainingType
+                );
+
+        trainerService.createTrainer(trainer);
+
+        boolean result =
+                trainerService.isTrainerCredentialsValid(
+                        trainer.getUserName(),
+                        trainer.getPassword()
+                );
+
+        assertTrue(result);
+    }
+
+    @Test
+    void shouldReturnFalseWhenTrainerPasswordIsWrong() {
+
+        TrainingType trainingType =
+                new TrainingType("YogaCredentialTest");
+
+        entityManager.persist(trainingType);
+
+        Trainer trainer =
+                new Trainer(
+                        "John",
+                        "Smith",
+                        trainingType
+                );
+
+        trainerService.createTrainer(trainer);
+
+        boolean result =
+                trainerService.isTrainerCredentialsValid(
+                        trainer.getUserName(),
+                        "wrongPassword"
+                );
+
+        assertFalse(result);
+    }
 }

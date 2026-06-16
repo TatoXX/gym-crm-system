@@ -73,4 +73,20 @@ public class TrainerService {
 
         return trainerDao.getAllTrainers();
     }
+
+    @Transactional(readOnly = true)
+    public boolean isTrainerCredentialsValid(String username, String password) {
+
+        logger.info("Checking trainer credentials for username {}", username);
+
+        Trainer trainer =
+                trainerDao.findTrainerByUsername(username);
+
+        if (trainer == null) {
+            logger.warn("Trainer with username {} not found", username);
+            return false;
+        }
+
+        return trainer.getPassword().equals(password);
+    }
 }
