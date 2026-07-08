@@ -2,7 +2,7 @@ package org.epam.gym_crm_system1.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.dao.TraineeDao;
+import org.epam.gym_crm_system1.repository.TraineeRepository;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
@@ -30,7 +30,7 @@ class TraineeServiceTest {
     private TraineeService traineeService;
 
     @Autowired
-    private TraineeDao traineeDao;
+    private TraineeRepository traineeRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -49,7 +49,7 @@ class TraineeServiceTest {
         traineeService.createTrainee(trainee);
 
         Trainee savedTrainee =
-                traineeDao.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(trainee.getId());
 
         assertNotNull(savedTrainee);
         assertEquals("John.Smith", savedTrainee.getUserName());
@@ -124,7 +124,7 @@ class TraineeServiceTest {
         );
 
         Trainee updatedTrainee =
-                traineeDao.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(trainee.getId());
 
         assertEquals("newPassword123",
                 updatedTrainee.getPassword());
@@ -170,7 +170,7 @@ class TraineeServiceTest {
         traineeService.deactivateTrainee(trainee.getUserName());
 
         Trainee updatedTrainee =
-                traineeDao.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(trainee.getId());
 
         assertFalse(updatedTrainee.getIsActive());
     }
@@ -192,7 +192,7 @@ class TraineeServiceTest {
         traineeService.activateTrainee(trainee.getUserName());
 
         Trainee updatedTrainee =
-                traineeDao.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(trainee.getId());
 
         assertTrue(updatedTrainee.getIsActive());
     }
@@ -256,7 +256,7 @@ class TraineeServiceTest {
         traineeService.deleteTraineeByUsername(username);
 
         assertNull(
-                traineeDao.findTraineeById(traineeId)
+                traineeRepository.findTraineeById(traineeId)
         );
     }
 

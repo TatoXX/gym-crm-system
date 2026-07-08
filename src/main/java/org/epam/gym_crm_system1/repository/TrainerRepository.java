@@ -1,4 +1,4 @@
-package org.epam.gym_crm_system1.dao;
+package org.epam.gym_crm_system1.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 
 @Repository
-public class TrainerDao {
+public class TrainerRepository {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(TrainerDao.class);
+            LoggerFactory.getLogger(TrainerRepository.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -61,7 +61,7 @@ public class TrainerDao {
         try {
             return entityManager
                     .createQuery(
-                            "SELECT t FROM Trainer t WHERE t.userName = :username",
+                            "SELECT t FROM Trainer t WHERE t.user.userName = :username",
                             Trainer.class
                     )
                     .setParameter("username", username)
@@ -95,7 +95,7 @@ public class TrainerDao {
                                 "WHERE trainer NOT IN (" +
                                 "SELECT assignedTrainer FROM Trainee trainee " +
                                 "JOIN trainee.trainers assignedTrainer " +
-                                "WHERE trainee.userName = :traineeUsername" +
+                                "WHERE trainee.user.userName = :traineeUsername" +
                                 ")",
                         Trainer.class
                 )

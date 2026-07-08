@@ -2,11 +2,11 @@ package org.epam.gym_crm_system1.helper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.dao.TraineeDao;
-import org.epam.gym_crm_system1.dao.TrainerDao;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.TrainingType;
+import org.epam.gym_crm_system1.repository.TraineeRepository;
+import org.epam.gym_crm_system1.repository.TrainerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,10 +24,10 @@ class UserCredentialsGeneratorTest {
     private UserCredentialsGenerator generator;
 
     @Autowired
-    private TraineeDao traineeDao;
+    private TraineeRepository traineeRepository;
 
     @Autowired
-    private TrainerDao trainerDao;
+    private TrainerRepository trainerRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -47,7 +47,7 @@ class UserCredentialsGeneratorTest {
         existingTrainee.setPassword("password123");
         existingTrainee.setIsActive(true);
 
-        traineeDao.saveTrainee(existingTrainee);
+        traineeRepository.saveTrainee(existingTrainee);
 
         Trainee newTrainee =
                 new Trainee(
@@ -58,7 +58,7 @@ class UserCredentialsGeneratorTest {
                 );
 
         String username =
-                generator.generateUsername(newTrainee);
+                generator.generateUsername(newTrainee.getUser());
 
         assertEquals("John.Smith1", username);
     }
@@ -75,7 +75,7 @@ class UserCredentialsGeneratorTest {
                 );
 
         String username =
-                generator.generateUsername(trainee);
+                generator.generateUsername(trainee.getUser());
 
         assertEquals("John.Smith", username);
     }
@@ -95,7 +95,7 @@ class UserCredentialsGeneratorTest {
         trainee1.setPassword("password123");
         trainee1.setIsActive(true);
 
-        traineeDao.saveTrainee(trainee1);
+        traineeRepository.saveTrainee(trainee1);
 
         Trainee trainee2 =
                 new Trainee(
@@ -109,7 +109,7 @@ class UserCredentialsGeneratorTest {
         trainee2.setPassword("password123");
         trainee2.setIsActive(true);
 
-        traineeDao.saveTrainee(trainee2);
+        traineeRepository.saveTrainee(trainee2);
 
         Trainee newTrainee =
                 new Trainee(
@@ -120,7 +120,7 @@ class UserCredentialsGeneratorTest {
                 );
 
         String username =
-                generator.generateUsername(newTrainee);
+                generator.generateUsername(newTrainee.getUser());
 
         assertEquals("John.Smith2", username);
     }
@@ -144,7 +144,7 @@ class UserCredentialsGeneratorTest {
         existingTrainer.setPassword("password123");
         existingTrainer.setIsActive(true);
 
-        trainerDao.saveTrainer(existingTrainer);
+        trainerRepository.saveTrainer(existingTrainer);
 
         Trainee newTrainee =
                 new Trainee(
@@ -155,7 +155,7 @@ class UserCredentialsGeneratorTest {
                 );
 
         String username =
-                generator.generateUsername(newTrainee);
+                generator.generateUsername(newTrainee.getUser());
 
         assertEquals("John.Smith1", username);
     }

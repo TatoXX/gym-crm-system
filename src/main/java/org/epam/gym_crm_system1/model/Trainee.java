@@ -10,10 +10,19 @@ import java.util.Set;
 
 @Entity
 @Table(name = "trainees")
-public class Trainee extends User {
+public class Trainee {
+
+    @Id
+    private int id;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @MapsId
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user = new User();
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
     @Column(name = "address")
     private String address;
 
@@ -26,11 +35,87 @@ public class Trainee extends User {
     public Trainee() {
     }
 
-    public Trainee(String firstName, String lastName, String address, LocalDate dateOfBirth) {
-        super(firstName, lastName, null, null, false);
+    public Trainee(String firstName,
+                   String lastName,
+                   String address,
+                   LocalDate dateOfBirth) {
+
+        this.user = new User(firstName, lastName, null, null, false);
         this.address = address;
         this.dateOfBirth = dateOfBirth;
     }
+
+    private User getOrCreateUser() {
+        if (user == null) {
+            user = new User();
+        }
+
+        return user;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+        getOrCreateUser().setId(id);
+    }
+
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
+    public String getFirstName() {
+        return user != null ? user.getFirstName() : null;
+    }
+
+    public void setFirstName(String firstName) {
+        getOrCreateUser().setFirstName(firstName);
+    }
+
+
+    public String getLastName() {
+        return user != null ? user.getLastName() : null;
+    }
+
+    public void setLastName(String lastName) {
+        getOrCreateUser().setLastName(lastName);
+    }
+
+
+    public String getUserName() {
+        return user != null ? user.getUserName() : null;
+    }
+
+    public void setUserName(String userName) {
+        getOrCreateUser().setUserName(userName);
+    }
+
+
+    public String getPassword() {
+        return user != null ? user.getPassword() : null;
+    }
+
+    public void setPassword(String password) {
+        getOrCreateUser().setPassword(password);
+    }
+
+
+    public boolean getIsActive() {
+        return user != null && user.getIsActive();
+    }
+
+    public void setIsActive(boolean active) {
+        getOrCreateUser().setIsActive(active);
+    }
+
 
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
@@ -70,7 +155,7 @@ public class Trainee extends User {
     @Override
     public String toString() {
         return "Trainee{" +
-                "id=" + getId() +
+                "id=" + id +
                 ", firstName='" + getFirstName() + '\'' +
                 ", lastName='" + getLastName() + '\'' +
                 ", userName='" + getUserName() + '\'' +

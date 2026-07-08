@@ -1,14 +1,14 @@
 package org.epam.gym_crm_system1.service;
 
-import org.epam.gym_crm_system1.dao.TrainingDao;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
 import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.helper.UserCredentialsGenerator;
-import org.epam.gym_crm_system1.dao.TrainerDao;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
+import org.epam.gym_crm_system1.repository.TrainerRepository;
+import org.epam.gym_crm_system1.repository.TrainingRepository;
 import org.epam.gym_crm_system1.validator.UserValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,41 +24,43 @@ public class TrainerService {
     private static final Logger logger =
             LoggerFactory.getLogger(TrainerService.class);
 
-    private final TrainerDao trainerDao;
+    private final TrainerRepository trainerRepository;
     private final UserCredentialsGenerator userCredentialsGenerator;
-    private final TrainingDao trainingDao;
+    private final TrainingRepository trainingRepository;
     private final UserValidator userValidator;
 
-    public TrainerService(TrainerDao trainerDao,
-                          TrainingDao trainingDao,
+    public TrainerService(TrainerRepository trainerRepository,
+                          TrainingRepository trainingRepository,
                           UserCredentialsGenerator userCredentialsGenerator,
                           UserValidator userValidator) {
 
         this.userValidator = userValidator;
-        this.trainingDao = trainingDao;
-        this.trainerDao = trainerDao;
+        this.trainingRepository = trainingRepository;
+        this.trainerRepository = trainerRepository;
         this.userCredentialsGenerator = userCredentialsGenerator;
     }
 
-   @Transactional
+    @Transactional
     public void createTrainer(Trainer trainer) {
 
-       if (trainer == null) {
-           throw new ValidationException("Trainer is required");
-       }
+        if (trainer == null) {
+            throw new ValidationException("Trainer is required");
+        }
 
-       userValidator.validateFirstName(trainer.getFirstName());
-       userValidator.validateLastName(trainer.getLastName());
+        userValidator.validateName(trainer.getFirstName(), "First name");
+        userValidator.validateName(trainer.getLastName(), "Last name");
 
-       if (trainer.getTrainingType() == null) {
-           throw new ValidationException("Training type is required");
-       }
+        if (trainer.getTrainingType() == null) {
+            throw new ValidationException("Training type is required");
+        }
 
         logger.info("Creating trainer with id {}",
                 trainer.getId());
 
         String username =
-                userCredentialsGenerator.generateUsername(trainer);
+                userCredentialsGenerator.generateUsername(
+                        trainer.getUser()
+                );
 
         String password =
                 userCredentialsGenerator.generatePassword();
@@ -67,7 +69,7 @@ public class TrainerService {
         trainer.setPassword(password);
         trainer.setIsActive(true);
 
-        trainerDao.saveTrainer(trainer);
+        trainerRepository.saveTrainer(trainer);
 
         logger.info("Trainer created successfully with username {}",
                 trainer.getUserName());
@@ -78,7 +80,7 @@ public class TrainerService {
 
         logger.info("Selecting trainer with id {}", id);
 
-        return trainerDao.getTrainerById(id);
+        return trainerRepository.getTrainerById(id);
     }
 
     @Transactional
@@ -89,8 +91,8 @@ public class TrainerService {
         }
 
         userValidator.validateId(trainer.getId());
-        userValidator.validateFirstName(trainer.getFirstName());
-        userValidator.validateLastName(trainer.getLastName());
+        userValidator.validateName(trainer.getFirstName(), "First name");
+        userValidator.validateName(trainer.getLastName(), "Last name");
         userValidator.validateUsername(trainer.getUserName());
         userValidator.validatePassword(trainer.getPassword());
 
@@ -101,16 +103,17 @@ public class TrainerService {
         logger.info("Updating trainer with id {}",
                 trainer.getId());
 
-        trainerDao.updateTrainer(trainer);
+        trainerRepository.updateTrainer(trainer);
 
         logger.info("Trainer updated successfully");
     }
+
     @Transactional(readOnly = true)
     public Collection<Trainer> selectAllTrainers() {
 
         logger.info("Selecting all trainers");
 
-        return trainerDao.getAllTrainers();
+        return trainerRepository.getAllTrainers();
     }
 
     @Transactional(readOnly = true)
@@ -119,7 +122,7 @@ public class TrainerService {
         logger.info("Checking trainer credentials for username {}", username);
 
         Trainer trainer =
-                trainerDao.findTrainerByUsername(username);
+                trainerRepository.findTrainerByUsername(username);
 
         if (trainer == null) {
             logger.warn("Trainer with username {} not found", username);
@@ -141,7 +144,7 @@ public class TrainerService {
         }
 
         Trainer trainer =
-                trainerDao.findTrainerByUsername(username);
+                trainerRepository.findTrainerByUsername(username);
 
         if (trainer == null ||
                 !trainer.getPassword().equals(oldPassword)) {
@@ -153,11 +156,10 @@ public class TrainerService {
 
         trainer.setPassword(newPassword);
 
-        trainerDao.updateTrainer(trainer);
+        trainerRepository.updateTrainer(trainer);
 
         logger.info("Trainer password changed successfully");
     }
-
 
     @Transactional
     public void activateTrainer(String username) {
@@ -165,7 +167,7 @@ public class TrainerService {
         logger.info("Activating trainer with username {}", username);
 
         Trainer trainer =
-                trainerDao.findTrainerByUsername(username);
+                trainerRepository.findTrainerByUsername(username);
 
         if (trainer == null) {
             throw new EntityNotFoundException("Trainer not found");
@@ -177,7 +179,7 @@ public class TrainerService {
 
         trainer.setIsActive(true);
 
-        trainerDao.updateTrainer(trainer);
+        trainerRepository.updateTrainer(trainer);
 
         logger.info("Trainer activated successfully");
     }
@@ -188,7 +190,7 @@ public class TrainerService {
         logger.info("Deactivating trainer with username {}", username);
 
         Trainer trainer =
-                trainerDao.findTrainerByUsername(username);
+                trainerRepository.findTrainerByUsername(username);
 
         if (trainer == null) {
             throw new EntityNotFoundException("Trainer not found");
@@ -200,7 +202,7 @@ public class TrainerService {
 
         trainer.setIsActive(false);
 
-        trainerDao.updateTrainer(trainer);
+        trainerRepository.updateTrainer(trainer);
 
         logger.info("Trainer deactivated successfully");
     }
@@ -217,7 +219,7 @@ public class TrainerService {
         logger.info("Selecting trainer with username {}", username);
 
         Trainer trainer =
-                trainerDao.findTrainerByUsername(username);
+                trainerRepository.findTrainerByUsername(username);
 
         if (trainer == null) {
             throw new EntityNotFoundException("Trainer not found");
@@ -245,7 +247,7 @@ public class TrainerService {
         }
 
         Trainer trainer =
-                trainerDao.findTrainerByUsername(trainerUsername);
+                trainerRepository.findTrainerByUsername(trainerUsername);
 
         if (trainer == null) {
             throw new EntityNotFoundException("Trainer not found");
@@ -253,7 +255,7 @@ public class TrainerService {
 
         logger.info("Getting trainings for trainer username {}", trainerUsername);
 
-        return trainingDao.findTrainingsByTrainerUsernameAndCriteria(
+        return trainingRepository.findTrainingsByTrainerUsernameAndCriteria(
                 trainerUsername,
                 fromDate,
                 toDate,

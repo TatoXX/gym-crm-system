@@ -2,7 +2,7 @@ package org.epam.gym_crm_system1.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.dao.TrainingDao;
+import org.epam.gym_crm_system1.repository.TrainingRepository;
 import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
@@ -25,7 +25,7 @@ class TrainingServiceTest {
     private TrainingService trainingService;
 
     @Autowired
-    private TrainingDao trainingDao;
+    private TrainingRepository TrainingRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -78,7 +78,7 @@ class TrainingServiceTest {
         trainingService.createTraining(training);
 
         Training savedTraining =
-                trainingDao.getTrainingById(training.getTrainingId());
+                TrainingRepository.getTrainingById(training.getTrainingId());
 
         assertNotNull(savedTraining);
         assertEquals("Morning Cardio", savedTraining.getTrainingName());

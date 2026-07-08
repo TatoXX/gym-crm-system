@@ -1,4 +1,4 @@
-package org.epam.gym_crm_system1.dao;
+package org.epam.gym_crm_system1.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -11,10 +11,10 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 @Repository
-public class TrainingDao {
+public class TrainingRepository {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(TrainingDao.class);
+            LoggerFactory.getLogger(TrainingRepository.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -54,7 +54,6 @@ public class TrainingDao {
                 .getResultList();
     }
 
-
     public Collection<Training> findTrainingsByTraineeUsernameAndCriteria(
             String traineeUsername,
             LocalDate fromDate,
@@ -67,7 +66,7 @@ public class TrainingDao {
 
         String jpql =
                 "SELECT tr FROM Training tr " +
-                        "WHERE tr.trainee.userName = :traineeUsername ";
+                        "WHERE tr.trainee.user.userName = :traineeUsername ";
 
         if (fromDate != null) {
             jpql += "AND tr.trainingDate >= :fromDate ";
@@ -78,7 +77,7 @@ public class TrainingDao {
         }
 
         if (trainerUsername != null && !trainerUsername.isBlank()) {
-            jpql += "AND tr.trainer.userName = :trainerUsername ";
+            jpql += "AND tr.trainer.user.userName = :trainerUsername ";
         }
 
         if (trainingTypeName != null && !trainingTypeName.isBlank()) {
@@ -109,7 +108,6 @@ public class TrainingDao {
         return query.getResultList();
     }
 
-
     public Collection<Training> findTrainingsByTrainerUsernameAndCriteria(
             String trainerUsername,
             LocalDate fromDate,
@@ -121,7 +119,7 @@ public class TrainingDao {
 
         String jpql =
                 "SELECT tr FROM Training tr " +
-                        "WHERE tr.trainer.userName = :trainerUsername ";
+                        "WHERE tr.trainer.user.userName = :trainerUsername ";
 
         if (fromDate != null) {
             jpql += "AND tr.trainingDate >= :fromDate ";
@@ -132,8 +130,8 @@ public class TrainingDao {
         }
 
         if (traineeName != null && !traineeName.isBlank()) {
-            jpql += "AND (tr.trainee.firstName = :traineeName " +
-                    "OR tr.trainee.lastName = :traineeName) ";
+            jpql += "AND (tr.trainee.user.firstName = :traineeName " +
+                    "OR tr.trainee.user.lastName = :traineeName) ";
         }
 
         var query =

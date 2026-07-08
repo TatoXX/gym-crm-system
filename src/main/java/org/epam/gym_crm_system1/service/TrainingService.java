@@ -1,8 +1,8 @@
 package org.epam.gym_crm_system1.service;
 
-import org.epam.gym_crm_system1.dao.TrainingDao;
 import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.model.Training;
+import org.epam.gym_crm_system1.repository.TrainingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,10 @@ public class TrainingService {
     private static final Logger logger =
             LoggerFactory.getLogger(TrainingService.class);
 
-    private final TrainingDao trainingDao;
+    private final TrainingRepository trainingRepository;
 
-    public TrainingService(TrainingDao trainingDao) {
-        this.trainingDao = trainingDao;
+    public TrainingService(TrainingRepository trainingRepository) {
+        this.trainingRepository = trainingRepository;
     }
 
     @Transactional
@@ -57,7 +57,7 @@ public class TrainingService {
         logger.info("Creating training with id {}",
                 training.getTrainingId());
 
-        trainingDao.saveTraining(training);
+        trainingRepository.saveTraining(training);
 
         logger.info("Training created successfully");
     }
@@ -67,7 +67,7 @@ public class TrainingService {
 
         logger.info("Selecting training with id {}", id);
 
-        return trainingDao.getTrainingById(id);
+        return trainingRepository.getTrainingById(id);
     }
 
     @Transactional(readOnly = true)
@@ -75,6 +75,6 @@ public class TrainingService {
 
         logger.info("Selecting all trainings");
 
-        return trainingDao.getAllTrainings();
+        return trainingRepository.getAllTrainings();
     }
 }

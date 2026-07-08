@@ -1,4 +1,4 @@
-package org.epam.gym_crm_system1.dao;
+package org.epam.gym_crm_system1.repository;
 
 import org.epam.gym_crm_system1.model.Trainee;
 import org.junit.jupiter.api.Test;
@@ -12,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-class TraineeDaoTest {
+class TraineeRepositoryTest {
 
     @Autowired
-    private TraineeDao traineeDao;
+    private TraineeRepository traineeRepository;
 
     @Test
     void shouldSaveTrainee() {
@@ -32,10 +32,10 @@ class TraineeDaoTest {
         trainee.setPassword("password123");
         trainee.setIsActive(true);
 
-        traineeDao.saveTrainee(trainee);
+        traineeRepository.saveTrainee(trainee);
 
         Trainee savedTrainee =
-                traineeDao.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(trainee.getId());
 
         assertNotNull(savedTrainee);
 
@@ -64,14 +64,14 @@ class TraineeDaoTest {
         trainee.setPassword("password123");
         trainee.setIsActive(true);
 
-        traineeDao.saveTrainee(trainee);
+        traineeRepository.saveTrainee(trainee);
 
         trainee.setAddress("Batumi");
 
-        traineeDao.updateTrainee(trainee);
+        traineeRepository.updateTrainee(trainee);
 
         Trainee updatedTrainee =
-                traineeDao.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(trainee.getId());
 
         assertNotNull(updatedTrainee);
 
@@ -94,14 +94,14 @@ class TraineeDaoTest {
         trainee.setPassword("password123");
         trainee.setIsActive(true);
 
-        traineeDao.saveTrainee(trainee);
+        traineeRepository.saveTrainee(trainee);
 
         int traineeId = trainee.getId();
 
-        traineeDao.deleteTraineeById(traineeId);
+        traineeRepository.deleteTraineeById(traineeId);
 
         assertNull(
-                traineeDao.findTraineeById(traineeId)
+                traineeRepository.findTraineeById(traineeId)
         );
     }
 }

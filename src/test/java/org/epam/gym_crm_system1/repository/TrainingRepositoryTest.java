@@ -1,4 +1,4 @@
-package org.epam.gym_crm_system1.dao;
+package org.epam.gym_crm_system1.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-class TrainingDaoTest {
+class TrainingRepositoryTest {
 
     @Autowired
-    private TrainingDao trainingDao;
+    private TrainingRepository trainingRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -29,7 +29,7 @@ class TrainingDaoTest {
     void shouldSaveTraining() {
 
         TrainingType trainingType =
-                new TrainingType("FitnessTrainingDao");
+                new TrainingType("FitnessTrainingRepository");
 
         entityManager.persist(trainingType);
 
@@ -70,15 +70,23 @@ class TrainingDaoTest {
                         trainee
                 );
 
-        trainingDao.saveTraining(training);
+        trainingRepository.saveTraining(training);
 
         Training savedTraining =
-                trainingDao.getTrainingById(training.getTrainingId());
+                trainingRepository.getTrainingById(training.getTrainingId());
 
         assertNotNull(savedTraining);
-        assertEquals("Morning Cardio", savedTraining.getTrainingName());
-        assertEquals(60, savedTraining.getTrainingDurationMinutes());
-        assertEquals(trainer.getId(), savedTraining.getTrainer().getId());
-        assertEquals(trainee.getId(), savedTraining.getTrainee().getId());
+
+        assertEquals("Morning Cardio",
+                savedTraining.getTrainingName());
+
+        assertEquals(60,
+                savedTraining.getTrainingDurationMinutes());
+
+        assertEquals(trainer.getId(),
+                savedTraining.getTrainer().getId());
+
+        assertEquals(trainee.getId(),
+                savedTraining.getTrainee().getId());
     }
 }

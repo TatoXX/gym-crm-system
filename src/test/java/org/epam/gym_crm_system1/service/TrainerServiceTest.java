@@ -2,7 +2,7 @@ package org.epam.gym_crm_system1.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.dao.TrainerDao;
+import org.epam.gym_crm_system1.repository.TrainerRepository;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
@@ -29,7 +29,7 @@ class TrainerServiceTest {
     private TrainerService trainerService;
 
     @Autowired
-    private TrainerDao trainerDao;
+    private TrainerRepository trainerRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -52,7 +52,7 @@ class TrainerServiceTest {
         trainerService.createTrainer(trainer);
 
         Trainer savedTrainer =
-                trainerDao.getTrainerById(trainer.getId());
+                trainerRepository.getTrainerById(trainer.getId());
 
         assertNotNull(savedTrainer);
         assertEquals("John.Smith", savedTrainer.getUserName());
@@ -141,7 +141,7 @@ class TrainerServiceTest {
         );
 
         Trainer updatedTrainer =
-                trainerDao.getTrainerById(trainer.getId());
+                trainerRepository.getTrainerById(trainer.getId());
 
         assertEquals("newPassword123",
                 updatedTrainer.getPassword());
@@ -194,7 +194,7 @@ class TrainerServiceTest {
         trainerService.deactivateTrainer(trainer.getUserName());
 
         Trainer updatedTrainer =
-                trainerDao.getTrainerById(trainer.getId());
+                trainerRepository.getTrainerById(trainer.getId());
 
         assertFalse(updatedTrainer.getIsActive());
     }
@@ -220,7 +220,7 @@ class TrainerServiceTest {
         trainerService.activateTrainer(trainer.getUserName());
 
         Trainer updatedTrainer =
-                trainerDao.getTrainerById(trainer.getId());
+                trainerRepository.getTrainerById(trainer.getId());
 
         assertTrue(updatedTrainer.getIsActive());
     }

@@ -3,45 +3,28 @@ package org.epam.gym_crm_system1.validator;
 import org.epam.gym_crm_system1.exception.ValidationException;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class UserValidator {
 
-    public void validateFirstName(String firstName) {
-        if (firstName == null || firstName.isBlank()) {
-            throw new ValidationException("First name is required");
+    public void validateName(String name, String fieldName) {
+
+        if (name == null || name.isBlank()) {
+            throw new ValidationException(fieldName + " is required");
         }
 
-        firstName = firstName.trim();
+        name = name.trim();
 
-        if (firstName.length() < 2 || firstName.length() > 30) {
-            throw new ValidationException("First name must be between 2 and 30 characters");
+        if (name.length() < 2 || name.length() > 30) {
+            throw new ValidationException(fieldName + " must be between 2 and 30 characters");
         }
 
-        if (!firstName.matches("^[A-Z][a-zA-Z]*(?:[ '-][a-zA-Z]+)*$")) {
-            throw new ValidationException("First name has invalid format");
-        }
-    }
-
-
-    public void validateLastName(String lastName) {
-        if (lastName == null || lastName.isBlank()) {
-            throw new ValidationException("Last name is required");
-        }
-
-        lastName = lastName.trim();
-
-        if (lastName.length() < 2 || lastName.length() > 30) {
-            throw new ValidationException("Last name must be between 2 and 30 characters");
-        }
-
-        if (!lastName.matches("^[A-Z][a-zA-Z]*(?:[ '-][a-zA-Z]+)*$")) {
-            throw new ValidationException("Last name has invalid format");
+        if (!name.matches("^[A-Z][a-zA-Z]*(?:[ '-][a-zA-Z]+)*$")) {
+            throw new ValidationException(fieldName + " has invalid format");
         }
     }
-
 
     public void validateUsername(String userName) {
+
         if (userName == null || userName.isBlank()) {
             throw new ValidationException("Username is required");
         }
@@ -58,6 +41,7 @@ public class UserValidator {
     }
 
     public void validatePassword(String password) {
+
         if (password == null || password.isBlank()) {
             throw new ValidationException("Password is required");
         }
@@ -68,13 +52,14 @@ public class UserValidator {
     }
 
     public void validateId(int id) {
+
         if (id <= 0) {
             throw new ValidationException("Id must be positive");
         }
     }
 
-
     public void validateCredentials(String username, String password) {
+
         validateUsername(username);
         validatePassword(password);
     }

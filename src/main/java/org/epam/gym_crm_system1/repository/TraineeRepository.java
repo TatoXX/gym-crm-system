@@ -1,4 +1,4 @@
-package org.epam.gym_crm_system1.dao;
+package org.epam.gym_crm_system1.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 
 @Repository
-public class TraineeDao {
+public class TraineeRepository {
 
     private static final Logger logger =
-            LoggerFactory.getLogger(TraineeDao.class);
+            LoggerFactory.getLogger(TraineeRepository.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -50,7 +50,7 @@ public class TraineeDao {
         try {
             return entityManager
                     .createQuery(
-                            "SELECT t FROM Trainee t WHERE t.userName = :username",
+                            "SELECT t FROM Trainee t WHERE t.user.userName = :username",
                             Trainee.class
                     )
                     .setParameter("username", username)
@@ -100,6 +100,4 @@ public class TraineeDao {
 
         logger.info("Trainee deleted successfully");
     }
-
-
 }

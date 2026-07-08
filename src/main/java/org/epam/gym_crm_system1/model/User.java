@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +28,12 @@ public abstract class User {
     public User() {
     }
 
-    public User(String firstName, String lastName, String userName, String password, boolean isActive) {
+    public User(String firstName,
+                String lastName,
+                String userName,
+                String password,
+                boolean isActive) {
+
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;

@@ -1,4 +1,4 @@
-package org.epam.gym_crm_system1.dao;
+package org.epam.gym_crm_system1.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-class TrainerDaoTest {
+class TrainerRepositoryTest {
 
     @Autowired
-    private TrainerDao trainerDao;
+    private TrainerRepository trainerRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -25,7 +25,7 @@ class TrainerDaoTest {
     void shouldSaveTrainer() {
 
         TrainingType trainingType =
-                new TrainingType("FitnessDaoSave");
+                new TrainingType("FitnessRepositorySave");
 
         entityManager.persist(trainingType);
 
@@ -40,14 +40,17 @@ class TrainerDaoTest {
         trainer.setPassword("password123");
         trainer.setIsActive(true);
 
-        trainerDao.saveTrainer(trainer);
+        trainerRepository.saveTrainer(trainer);
 
         Trainer savedTrainer =
-                trainerDao.getTrainerById(trainer.getId());
+                trainerRepository.getTrainerById(trainer.getId());
 
         assertNotNull(savedTrainer);
-        assertEquals("John", savedTrainer.getFirstName());
-        assertEquals("FitnessDaoSave",
+
+        assertEquals("John",
+                savedTrainer.getFirstName());
+
+        assertEquals("FitnessRepositorySave",
                 savedTrainer.getTrainingType().getName());
     }
 
@@ -55,10 +58,10 @@ class TrainerDaoTest {
     void shouldUpdateTrainer() {
 
         TrainingType fitness =
-                new TrainingType("FitnessDaoUpdate");
+                new TrainingType("FitnessRepositoryUpdate");
 
         TrainingType yoga =
-                new TrainingType("YogaDaoUpdate");
+                new TrainingType("YogaRepositoryUpdate");
 
         entityManager.persist(fitness);
         entityManager.persist(yoga);
@@ -74,17 +77,18 @@ class TrainerDaoTest {
         trainer.setPassword("password123");
         trainer.setIsActive(true);
 
-        trainerDao.saveTrainer(trainer);
+        trainerRepository.saveTrainer(trainer);
 
         trainer.setTrainingType(yoga);
 
-        trainerDao.updateTrainer(trainer);
+        trainerRepository.updateTrainer(trainer);
 
         Trainer updatedTrainer =
-                trainerDao.getTrainerById(trainer.getId());
+                trainerRepository.getTrainerById(trainer.getId());
 
         assertNotNull(updatedTrainer);
-        assertEquals("YogaDaoUpdate",
+
+        assertEquals("YogaRepositoryUpdate",
                 updatedTrainer.getTrainingType().getName());
     }
 }
