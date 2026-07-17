@@ -3,7 +3,6 @@ package org.epam.gym_crm_system1.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.repository.TrainingRepository;
-import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.epam.gym_crm_system1.exception.ValidationException;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -3,10 +3,6 @@ package org.epam.gym_crm_system1.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.epam.gym_crm_system1.repository.TrainerRepository;
-import org.epam.gym_crm_system1.exception.EntityNotFoundException;
-import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
-import org.epam.gym_crm_system1.exception.ProfileStatusException;
-import org.epam.gym_crm_system1.exception.ValidationException;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Training;
 import org.epam.gym_crm_system1.model.TrainingType;
@@ -15,7 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.epam.gym_crm_system1.exception.EntityNotFoundException;
+import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
+import org.epam.gym_crm_system1.exception.ProfileStatusException;
+import org.epam.gym_crm_system1.exception.ValidationException;
 import java.time.LocalDate;
 import java.util.Collection;
 
