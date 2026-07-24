@@ -1,5 +1,6 @@
 package org.epam.gym_crm_system1.controller;
 
+import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -44,6 +45,9 @@ class TrainingControllerTest {
 
     @MockitoBean
     private AuthenticationService authenticationService;
+
+    @MockitoBean
+    private GymMetricsService gymMetricsService;
 
     @Test
     void getTraineeTrainings_ShouldReturnTrainingsList() throws Exception {
@@ -146,6 +150,7 @@ class TrainingControllerTest {
                 .andExpect(status().isOk());
 
         verify(trainingService).createTraining(any(Training.class));
+        verify(gymMetricsService).incrementTrainingCreationCount();
     }
 
     @Test

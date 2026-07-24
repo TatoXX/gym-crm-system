@@ -1,5 +1,6 @@
 package org.epam.gym_crm_system1.controller;
 
+import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.TrainingType;
@@ -16,9 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 
 @WebMvcTest(controllers = RegistrationController.class)
 public class RegistrationControllerTest {
@@ -28,7 +29,6 @@ public class RegistrationControllerTest {
 
     @MockitoBean
     private TraineeService traineeService;
-    
 
     @MockitoBean
     private TrainerService trainerService;
@@ -36,6 +36,8 @@ public class RegistrationControllerTest {
     @MockitoBean
     private TrainingTypeService trainingTypeService;
 
+    @MockitoBean
+    private GymMetricsService gymMetricsService;
 
     @Test
     void registerTrainee_ShouldReturnUsernameAndPassword() throws Exception {
@@ -59,8 +61,9 @@ public class RegistrationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("John.Smith"))
                 .andExpect(jsonPath("$.password").value("password123"));
-    }
 
+        verify(gymMetricsService).incrementTraineeRegistrationCount();
+    }
 
     @Test
     void registerTrainer_ShouldReturnUsernameAndPassword() throws Exception {
@@ -90,6 +93,8 @@ public class RegistrationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("Jane.Smith"))
                 .andExpect(jsonPath("$.password").value("password456"));
+
+        verify(gymMetricsService).incrementTrainerRegistrationCount();
     }
 
     @Test
@@ -106,6 +111,3 @@ public class RegistrationControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }
-
-
-

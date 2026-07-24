@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.epam.gym_crm_system1.dto.request.ChangeLoginRequest;
 import org.epam.gym_crm_system1.dto.request.LoginRequest;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
+import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.service.TraineeService;
 import org.epam.gym_crm_system1.service.TrainerService;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +21,14 @@ public class AuthController {
 
     private final TraineeService traineeService;
     private final TrainerService trainerService;
+    private final GymMetricsService gymMetricsService;
 
-    public AuthController(TraineeService traineeService, TrainerService trainerService) {
+    public AuthController(TraineeService traineeService,
+                          TrainerService trainerService,
+                          GymMetricsService gymMetricsService) {
         this.traineeService = traineeService;
         this.trainerService = trainerService;
+        this.gymMetricsService = gymMetricsService;
     }
 
     @ApiOperation(value = "Login user")
@@ -45,8 +50,11 @@ public class AuthController {
         );
 
         if (!traineeCredentialsValid && !trainerCredentialsValid) {
+            gymMetricsService.incrementLoginFailureCount();
             throw new InvalidCredentialsException("Invalid username or password");
         }
+
+        gymMetricsService.incrementLoginSuccessCount();
 
         return ResponseEntity.ok().build();
     }

@@ -1,5 +1,6 @@
 package org.epam.gym_crm_system1.controller;
 
+import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.service.TraineeService;
 import org.epam.gym_crm_system1.service.TrainerService;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class AuthControllerTest {
     @MockitoBean
     private TrainerService trainerService;
 
+    @MockitoBean
+    private GymMetricsService gymMetricsService;
+
     @Test
     void login_WhenTraineeCredentialsValid_ShouldReturnOk() throws Exception {
         Mockito.when(traineeService.isTraineeCredentialsValid("John.Smith", "password123"))
@@ -36,6 +40,8 @@ class AuthControllerTest {
                         .param("username", "John.Smith")
                         .param("password", "password123"))
                 .andExpect(status().isOk());
+
+        verify(gymMetricsService).incrementLoginSuccessCount();
     }
 
     @Test
@@ -49,6 +55,8 @@ class AuthControllerTest {
                         .param("username", "Jane.Smith")
                         .param("password", "password456"))
                 .andExpect(status().isOk());
+
+        verify(gymMetricsService).incrementLoginSuccessCount();
     }
 
     @Test
@@ -62,6 +70,8 @@ class AuthControllerTest {
                         .param("username", "Wrong.User")
                         .param("password", "wrong"))
                 .andExpect(status().isUnauthorized());
+
+        verify(gymMetricsService).incrementLoginFailureCount();
     }
 
     @Test

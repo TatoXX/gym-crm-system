@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.epam.gym_crm_system1.dto.request.TraineeRegistrationRequest;
 import org.epam.gym_crm_system1.dto.request.TrainerRegistrationRequest;
 import org.epam.gym_crm_system1.dto.response.CredentialsResponse;
+import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.TrainingType;
@@ -25,47 +26,55 @@ public class RegistrationController {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final TrainingTypeService trainingTypeService;
+    private final GymMetricsService gymMetricsService;
 
     public RegistrationController(TraineeService traineeService,
                                   TrainerService trainerService,
-                                  TrainingTypeService trainingTypeService) {
+                                  TrainingTypeService trainingTypeService,
+                                  GymMetricsService gymMetricsService) {
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.trainingTypeService = trainingTypeService;
+        this.gymMetricsService = gymMetricsService;
     }
 
     @ApiOperation(value = "Register trainee")
     @ApiResponses(value = {
-            @ApiResponse(code =200, message = "Trainee registered successfully"),
-            @ApiResponse(code =400, message = "Validation error")
+            @ApiResponse(code = 200, message = "Trainee registered successfully"),
+            @ApiResponse(code = 400, message = "Validation error")
     })
     @PostMapping("/trainees")
-    public ResponseEntity<CredentialsResponse> registerTrainee(@Valid @RequestBody TraineeRegistrationRequest request) {
-
-
+    public ResponseEntity<CredentialsResponse> registerTrainee(
+            @Valid @RequestBody TraineeRegistrationRequest request
+    ) {
         Trainee trainee = new Trainee(
                 request.getFirstName(),
                 request.getLastName(),
                 request.getAddress(),
                 request.getDateOfBirth()
         );
+
         traineeService.createTrainee(trainee);
+        gymMetricsService.incrementTraineeRegistrationCount();
 
-        CredentialsResponse response = new CredentialsResponse(trainee.getUserName(), trainee.getPassword());
+        CredentialsResponse response = new CredentialsResponse(
+                trainee.getUserName(),
+                trainee.getPassword()
+        );
 
-      return ResponseEntity.ok(response);
-
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "Register trainer")
     @ApiResponses(value = {
-            @ApiResponse(code =200, message = "Trainer registered successfully"),
-            @ApiResponse(code= 400, message = " Validation error"),
+            @ApiResponse(code = 200, message = "Trainer registered successfully"),
+            @ApiResponse(code = 400, message = "Validation error"),
             @ApiResponse(code = 404, message = "Training type not found")
     })
     @PostMapping("/trainers")
-    public ResponseEntity<CredentialsResponse> registerTrainer(@Valid @RequestBody TrainerRegistrationRequest request) {
-
+    public ResponseEntity<CredentialsResponse> registerTrainer(
+            @Valid @RequestBody TrainerRegistrationRequest request
+    ) {
         TrainingType specialization = trainingTypeService.findTrainingTypeById(
                 request.getSpecializationId()
         );
@@ -77,9 +86,13 @@ public class RegistrationController {
         );
 
         trainerService.createTrainer(trainer);
-        CredentialsResponse response = new CredentialsResponse(trainer.getUserName(), trainer.getPassword());
+        gymMetricsService.incrementTrainerRegistrationCount();
+
+        CredentialsResponse response = new CredentialsResponse(
+                trainer.getUserName(),
+                trainer.getPassword()
+        );
 
         return ResponseEntity.ok(response);
     }
-    
 }

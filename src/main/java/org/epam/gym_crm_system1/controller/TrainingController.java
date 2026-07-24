@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.epam.gym_crm_system1.dto.request.AddTrainingRequest;
 import org.epam.gym_crm_system1.dto.response.TraineeTrainingResponse;
 import org.epam.gym_crm_system1.dto.response.TrainerTrainingResponse;
+import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -33,15 +34,18 @@ public class TrainingController {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final AuthenticationService authenticationService;
+    private final GymMetricsService gymMetricsService;
 
     public TrainingController(TrainingService trainingService,
                               TraineeService traineeService,
                               TrainerService trainerService,
-                              AuthenticationService authenticationService) {
+                              AuthenticationService authenticationService,
+                              GymMetricsService gymMetricsService) {
         this.trainingService = trainingService;
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.authenticationService = authenticationService;
+        this.gymMetricsService = gymMetricsService;
     }
 
     @ApiOperation(value = "Get trainee trainings list")
@@ -147,6 +151,7 @@ public class TrainingController {
         );
 
         trainingService.createTraining(training);
+        gymMetricsService.incrementTrainingCreationCount();
 
         return ResponseEntity.ok().build();
     }
