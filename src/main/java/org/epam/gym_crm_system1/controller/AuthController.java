@@ -13,6 +13,13 @@ import org.epam.gym_crm_system1.service.TraineeService;
 import org.epam.gym_crm_system1.service.TrainerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.epam.gym_crm_system1.dto.response.JwtResponse;
+import org.epam.gym_crm_system1.security.JwtService;
+import org.epam.gym_crm_system1.security.BruteForceProtectionService;
+
 
 @Api(tags = "Authentication")
 @RestController
@@ -22,13 +29,25 @@ public class AuthController {
     private final TraineeService traineeService;
     private final TrainerService trainerService;
     private final GymMetricsService gymMetricsService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final BruteForceProtectionService bruteForceProtectionService;
 
-    public AuthController(TraineeService traineeService,
-                          TrainerService trainerService,
-                          GymMetricsService gymMetricsService) {
+    public AuthController(
+            TraineeService traineeService,
+            TrainerService trainerService,
+            GymMetricsService gymMetricsService,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService,
+            BruteForceProtectionService bruteForceProtectionService
+            ) {
+
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.gymMetricsService = gymMetricsService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.bruteForceProtectionService = bruteForceProtectionService;
     }
 
     @ApiOperation(value = "Login user")
@@ -38,25 +57,45 @@ public class AuthController {
             @ApiResponse(code = 401, message = "Invalid username or password")
     })
     @GetMapping("/login")
-    public ResponseEntity<Void> login(@Valid @ModelAttribute LoginRequest request) {
-        boolean traineeCredentialsValid = traineeService.isTraineeCredentialsValid(
-                request.getUsername(),
-                request.getPassword()
-        );
+    public ResponseEntity<JwtResponse> login(
+            @Valid @ModelAttribute LoginRequest request) {
 
-        boolean trainerCredentialsValid = trainerService.isTrainerCredentialsValid(
-                request.getUsername(),
-                request.getPassword()
-        );
-
-        if (!traineeCredentialsValid && !trainerCredentialsValid) {
-            gymMetricsService.incrementLoginFailureCount();
-            throw new InvalidCredentialsException("Invalid username or password");
+        if (bruteForceProtectionService.isBlocked(request.getUsername())) {
+            throw new InvalidCredentialsException(
+                    "User is temporarily blocked. Try again later."
+            );
         }
 
-        gymMetricsService.incrementLoginSuccessCount();
+        try {
+            authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken.unauthenticated(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
 
-        return ResponseEntity.ok().build();
+            gymMetricsService.incrementLoginSuccessCount();
+
+            String token =
+                    jwtService.generate(request.getUsername());
+
+            bruteForceProtectionService.loginSucceeded(request.getUsername());
+
+            return ResponseEntity.ok(
+                    new JwtResponse(token)
+            );
+
+        } catch (AuthenticationException exception) {
+
+            gymMetricsService.incrementLoginFailureCount();
+
+            bruteForceProtectionService.loginFailed(request.getUsername());
+
+
+            throw new InvalidCredentialsException(
+                    "Invalid username or password"
+            );
+        }
     }
 
     @ApiOperation(value = "Change user password")
@@ -99,4 +138,6 @@ public class AuthController {
 
         throw new InvalidCredentialsException("Invalid username or password");
     }
+
+
 }

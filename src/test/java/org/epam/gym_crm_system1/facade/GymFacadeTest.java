@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 
 import java.time.LocalDate;
@@ -22,11 +23,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class GymFacadeTest {
 
+    private static final String PASSWORD = "password123";
+
     @Autowired
     private GymFacade facade;
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void shouldCreateTraineeThroughFacade() {
@@ -41,10 +47,16 @@ class GymFacadeTest {
 
         facade.createTrainee(trainee);
 
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
+
         Trainee foundTrainee =
                 facade.selectTraineeByUsername(
                         trainee.getUserName(),
-                        trainee.getPassword()
+                        PASSWORD
                 );
 
         assertNotNull(foundTrainee);
@@ -72,10 +84,16 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         Trainer foundTrainer =
                 facade.selectTrainerByUsername(
                         trainer.getUserName(),
-                        trainer.getPassword()
+                        PASSWORD
                 );
 
         assertNotNull(foundTrainer);
@@ -99,10 +117,16 @@ class GymFacadeTest {
 
         facade.createTrainee(trainee);
 
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
+
         assertTrue(
                 facade.isTraineeCredentialsValid(
                         trainee.getUserName(),
-                        trainee.getPassword()
+                        PASSWORD
                 )
         );
 
@@ -131,10 +155,16 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         assertTrue(
                 facade.isTrainerCredentialsValid(
                         trainer.getUserName(),
-                        trainer.getPassword()
+                        PASSWORD
                 )
         );
 
@@ -159,9 +189,15 @@ class GymFacadeTest {
 
         facade.createTrainee(trainee);
 
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
+
         facade.changeTraineePassword(
                 trainee.getUserName(),
-                trainee.getPassword(),
+                PASSWORD,
                 "newPassword123"
         );
 
@@ -197,9 +233,15 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         facade.changeTrainerPassword(
                 trainer.getUserName(),
-                trainer.getPassword(),
+                PASSWORD,
                 "newPassword123"
         );
 
@@ -238,7 +280,7 @@ class GymFacadeTest {
                 new Trainer("Alex", "Stone", fitness);
 
         trainer1.setUserName("Alex.Stone");
-        trainer1.setPassword("password123");
+        trainer1.setPassword(passwordEncoder.encode(PASSWORD));
         trainer1.setIsActive(true);
 
         entityManager.persist(trainer1);
@@ -247,7 +289,7 @@ class GymFacadeTest {
                 new Trainer("Bob", "Green", yoga);
 
         trainer2.setUserName("Bob.Green");
-        trainer2.setPassword("password123");
+        trainer2.setPassword(passwordEncoder.encode(PASSWORD));
         trainer2.setIsActive(true);
 
         entityManager.persist(trainer2);
@@ -256,7 +298,7 @@ class GymFacadeTest {
                 new Trainer("Mike", "Black", boxing);
 
         trainer3.setUserName("Mike.Black");
-        trainer3.setPassword("password123");
+        trainer3.setPassword(passwordEncoder.encode(PASSWORD));
         trainer3.setIsActive(true);
 
         entityManager.persist(trainer3);
@@ -270,7 +312,7 @@ class GymFacadeTest {
                 );
 
         trainee.setUserName("Anna.Facade");
-        trainee.setPassword("password123");
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
         trainee.setIsActive(true);
 
         entityManager.persist(trainee);
@@ -395,10 +437,16 @@ class GymFacadeTest {
 
         facade.createTrainee(trainee);
 
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
+
         Trainee foundTrainee =
                 facade.selectTraineeByUsername(
                         trainee.getUserName(),
-                        trainee.getPassword()
+                        PASSWORD
                 );
 
         assertNotNull(foundTrainee);
@@ -421,6 +469,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainee(trainee);
+
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
 
         assertThrows(
                 InvalidCredentialsException.class,
@@ -448,10 +502,16 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         Trainer foundTrainer =
                 facade.selectTrainerByUsername(
                         trainer.getUserName(),
-                        trainer.getPassword()
+                        PASSWORD
                 );
 
         assertNotNull(foundTrainer);
@@ -479,6 +539,12 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         assertThrows(
                 InvalidCredentialsException.class,
                 () -> facade.selectTrainerByUsername(
@@ -505,6 +571,12 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         Trainee trainee =
                 new Trainee(
                         "Anna",
@@ -514,6 +586,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainee(trainee);
+
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
 
         Training training =
                 new Training(
@@ -531,7 +609,7 @@ class GymFacadeTest {
         Collection<Training> trainings =
                 facade.getTrainerTrainingsByCriteria(
                         trainer.getUserName(),
-                        trainer.getPassword(),
+                        PASSWORD,
                         LocalDate.of(2026, 5, 1),
                         LocalDate.of(2026, 5, 15),
                         "Anna"
@@ -562,6 +640,12 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         assertThrows(
                 InvalidCredentialsException.class,
                 () -> facade.getTrainerTrainingsByCriteria(
@@ -591,6 +675,12 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         Trainee trainee =
                 new Trainee(
                         "Create",
@@ -600,6 +690,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainee(trainee);
+
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
 
         Training training =
                 new Training(
@@ -614,7 +710,7 @@ class GymFacadeTest {
         facade.createTraining(
                 training,
                 trainer.getUserName(),
-                trainer.getPassword()
+                PASSWORD
         );
 
         entityManager.flush();
@@ -651,6 +747,12 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer1);
 
+        trainer1.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer1);
+
+        entityManager.flush();
+
         Trainer trainer2 =
                 new Trainer(
                         "Other",
@@ -659,6 +761,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainer(trainer2);
+
+        trainer2.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer2);
+
+        entityManager.flush();
 
         Trainee trainee =
                 new Trainee(
@@ -669,6 +777,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainee(trainee);
+
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
 
         Training training =
                 new Training(
@@ -685,7 +799,7 @@ class GymFacadeTest {
                 () -> facade.createTraining(
                         training,
                         trainer1.getUserName(),
-                        trainer1.getPassword()
+                        PASSWORD
                 )
         );
     }
@@ -707,6 +821,12 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer);
 
+        trainer.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer);
+
+        entityManager.flush();
+
         Trainee trainee =
                 new Trainee(
                         "Trainee",
@@ -716,6 +836,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainee(trainee);
+
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
 
         Training training =
                 new Training(
@@ -733,7 +859,7 @@ class GymFacadeTest {
         Collection<Training> trainings =
                 facade.getTraineeTrainingsByCriteria(
                         trainee.getUserName(),
-                        trainee.getPassword(),
+                        PASSWORD,
                         LocalDate.of(2026, 5, 1),
                         LocalDate.of(2026, 5, 15),
                         trainer.getUserName(),
@@ -760,6 +886,12 @@ class GymFacadeTest {
                 );
 
         facade.createTrainee(trainee);
+
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
 
         assertThrows(
                 InvalidCredentialsException.class,
@@ -791,10 +923,22 @@ class GymFacadeTest {
 
         facade.createTrainer(trainer1);
 
+        trainer1.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer1);
+
+        entityManager.flush();
+
         Trainer trainer2 =
                 new Trainer("List", "TrainerTwo", yoga);
 
         facade.createTrainer(trainer2);
+
+        trainer2.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainer2);
+
+        entityManager.flush();
 
         Trainee trainee =
                 new Trainee(
@@ -806,9 +950,15 @@ class GymFacadeTest {
 
         facade.createTrainee(trainee);
 
+        trainee.setPassword(passwordEncoder.encode(PASSWORD));
+
+        entityManager.merge(trainee);
+
+        entityManager.flush();
+
         facade.updateTraineeTrainersList(
                 trainee.getUserName(),
-                trainee.getPassword(),
+                PASSWORD,
                 List.of(
                         trainer1.getUserName(),
                         trainer2.getUserName()

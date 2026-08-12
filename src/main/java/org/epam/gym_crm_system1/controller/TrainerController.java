@@ -11,7 +11,6 @@ import org.epam.gym_crm_system1.dto.response.TrainerProfileResponse;
 import org.epam.gym_crm_system1.dto.response.UpdateTrainerProfileResponse;
 import org.epam.gym_crm_system1.mapper.ResponseMapper;
 import org.epam.gym_crm_system1.model.Trainer;
-import org.epam.gym_crm_system1.service.AuthenticationService;
 import org.epam.gym_crm_system1.service.TrainerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +21,11 @@ import org.springframework.web.bind.annotation.*;
 public class TrainerController {
 
     private final TrainerService trainerService;
-    private final AuthenticationService authenticationService;
     private final ResponseMapper responseMapper;
 
     public TrainerController(TrainerService trainerService,
-                             AuthenticationService authenticationService,
                              ResponseMapper responseMapper) {
         this.trainerService = trainerService;
-        this.authenticationService = authenticationService;
         this.responseMapper = responseMapper;
     }
 
@@ -42,10 +38,8 @@ public class TrainerController {
     })
     @GetMapping
     public ResponseEntity<TrainerProfileResponse> getTrainerProfile(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam String username
     ){
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Trainer trainer = trainerService.selectTrainerByUsername(username);
 
@@ -64,10 +58,9 @@ public class TrainerController {
     })
     @PutMapping
     public ResponseEntity<UpdateTrainerProfileResponse> updateTrainerProfile(
-            @RequestHeader(value = "Authorization", required =false) String authorizationHeader,
             @Valid @RequestBody UpdateTrainerProfileRequest request
     ){
-        authenticationService.authenticateBasic(authorizationHeader);
+
 
         Trainer trainer = trainerService.selectTrainerByUsername(request.getUsername());
 
@@ -92,13 +85,12 @@ public class TrainerController {
     })
     @PatchMapping("/status")
     public ResponseEntity<Void> updateTrainerStatus(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody UpdateActiveStatusRequest request
 
 
     ){
 
-      authenticationService.authenticateBasic(authorizationHeader);
+
 
        if (request.getIsActive()) {
            trainerService.activateTrainer(request.getUsername());

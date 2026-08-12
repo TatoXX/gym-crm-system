@@ -4,12 +4,14 @@ import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.TrainingType;
+import org.epam.gym_crm_system1.security.JwtAuthenticationFilter;
 import org.epam.gym_crm_system1.service.TraineeService;
 import org.epam.gym_crm_system1.service.TrainerService;
 import org.epam.gym_crm_system1.service.TrainingTypeService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -19,10 +21,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = RegistrationController.class)
-public class RegistrationControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+class RegistrationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,75 +43,117 @@ public class RegistrationControllerTest {
     @MockitoBean
     private GymMetricsService gymMetricsService;
 
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Test
     void registerTrainee_ShouldReturnUsernameAndPassword() throws Exception {
-        Mockito.doAnswer(invocation -> {
+
+        Mockito.when(
+                traineeService.createTrainee(
+                        any(Trainee.class)
+                )
+        ).thenAnswer(invocation -> {
+
             Trainee trainee = invocation.getArgument(0);
+
             trainee.setUserName("John.Smith");
-            trainee.setPassword("password123");
-            return null;
-        }).when(traineeService).createTrainee(any(Trainee.class));
 
-        mockMvc.perform(post("/api/trainees")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "firstName": "John",
-                                  "lastName": "Smith",
-                                  "dateOfBirth": "2000-05-10",
-                                  "address": "Tbilisi"
-                                }
-                                """))
+            return "password123";
+        });
+
+        mockMvc.perform(
+                        post("/api/trainees")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                          "firstName": "John",
+                                          "lastName": "Smith",
+                                          "dateOfBirth": "2000-05-10",
+                                          "address": "Tbilisi"
+                                        }
+                                        """)
+                )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("John.Smith"))
-                .andExpect(jsonPath("$.password").value("password123"));
+                .andExpect(
+                        jsonPath("$.username")
+                                .value("John.Smith")
+                )
+                .andExpect(
+                        jsonPath("$.password")
+                                .value("password123")
+                );
 
-        verify(gymMetricsService).incrementTraineeRegistrationCount();
+        verify(gymMetricsService)
+                .incrementTraineeRegistrationCount();
     }
 
     @Test
     void registerTrainer_ShouldReturnUsernameAndPassword() throws Exception {
+
         TrainingType trainingType = new TrainingType();
+
         trainingType.setId(1);
         trainingType.setName("Fitness");
 
-        Mockito.when(trainingTypeService.findTrainingTypeById(eq(1)))
-                .thenReturn(trainingType);
+        Mockito.when(
+                trainingTypeService.findTrainingTypeById(
+                        eq(1)
+                )
+        ).thenReturn(trainingType);
 
-        Mockito.doAnswer(invocation -> {
+        Mockito.when(
+                trainerService.createTrainer(
+                        any(Trainer.class)
+                )
+        ).thenAnswer(invocation -> {
+
             Trainer trainer = invocation.getArgument(0);
+
             trainer.setUserName("Jane.Smith");
-            trainer.setPassword("password456");
-            return null;
-        }).when(trainerService).createTrainer(any(Trainer.class));
 
-        mockMvc.perform(post("/api/trainers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "firstName": "Jane",
-                                  "lastName": "Smith",
-                                  "specializationId": 1
-                                }
-                                """))
+            return "password456";
+        });
+
+        mockMvc.perform(
+                        post("/api/trainers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                          "firstName": "Jane",
+                                          "lastName": "Smith",
+                                          "specializationId": 1
+                                        }
+                                        """)
+                )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("Jane.Smith"))
-                .andExpect(jsonPath("$.password").value("password456"));
+                .andExpect(
+                        jsonPath("$.username")
+                                .value("Jane.Smith")
+                )
+                .andExpect(
+                        jsonPath("$.password")
+                                .value("password456")
+                );
 
-        verify(gymMetricsService).incrementTrainerRegistrationCount();
+        verify(gymMetricsService)
+                .incrementTrainerRegistrationCount();
     }
 
     @Test
     void registerTrainee_WhenFirstNameMissing_ShouldReturnBadRequest() throws Exception {
-        mockMvc.perform(post("/api/trainees")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "lastName": "Smith",
-                                  "dateOfBirth": "2000-05-10",
-                                  "address": "Tbilisi"
-                                }
-                                """))
+
+        mockMvc.perform(
+                        post("/api/trainees")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                          "lastName": "Smith",
+                                          "dateOfBirth": "2000-05-10",
+                                          "address": "Tbilisi"
+                                        }
+                                        """)
+                )
                 .andExpect(status().isBadRequest());
     }
 }

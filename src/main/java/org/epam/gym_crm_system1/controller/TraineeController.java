@@ -13,8 +13,7 @@ import org.epam.gym_crm_system1.dto.response.UpdateTraineeProfileResponse;
 import org.epam.gym_crm_system1.mapper.ResponseMapper;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
-import org.epam.gym_crm_system1.service.AuthenticationService;
-import org.epam.gym_crm_system1.service.TraineeService;
+ import org.epam.gym_crm_system1.service.TraineeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.epam.gym_crm_system1.dto.request.TrainerUsernameRequest;
@@ -31,14 +30,11 @@ import java.util.stream.Collectors;
 public class TraineeController {
 
     private final TraineeService traineeService;
-    private final AuthenticationService authenticationService;
     private final ResponseMapper responseMapper;
 
     public TraineeController(TraineeService traineeService,
-                             AuthenticationService authenticationService,
                              ResponseMapper responseMapper) {
         this.traineeService = traineeService;
-        this.authenticationService = authenticationService;
         this.responseMapper = responseMapper;
     }
 
@@ -51,10 +47,8 @@ public class TraineeController {
     })
     @GetMapping
     public ResponseEntity<TraineeProfileResponse> getTraineeProfile(
-            @RequestHeader(value ="Authorization", required = false) String authorizationHeader,
             @RequestParam String username) {
 
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Trainee trainee  = traineeService.selectTraineeByUsername(username);
 
@@ -73,10 +67,8 @@ public class TraineeController {
     })
     @PutMapping
     public ResponseEntity<UpdateTraineeProfileResponse> updateTraineeProfile(
-            @RequestHeader(value ="Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody UpdateTraineeProfileRequest request
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Trainee trainee = traineeService.selectTraineeByUsername(request.getUsername());
 
@@ -103,10 +95,8 @@ public class TraineeController {
     })
     @DeleteMapping
     public ResponseEntity<Void> deleteTraineeProfile(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam String username
     ){
-        authenticationService.authenticateBasic(authorizationHeader);
 
         traineeService.deleteTraineeByUsername(username);
 
@@ -122,10 +112,8 @@ public class TraineeController {
     })
     @GetMapping("/not-assigned-trainers")
     public ResponseEntity<List<TrainerSummaryResponse>> getNotAssignedActiveTrainers(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam String username
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Collection<Trainer> trainers = traineeService.getTrainersNotAssignedToTrainee(username);
 
@@ -144,10 +132,8 @@ public class TraineeController {
     })
     @PutMapping("/trainers")
     public ResponseEntity<List<TrainerSummaryResponse>> updateTraineeTrainersList(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody UpdateTraineeTrainersRequest request
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         List<String> trainerUsernames = request.getTrainers()
                 .stream()
@@ -174,10 +160,8 @@ public class TraineeController {
     })
     @PatchMapping("/status")
     public ResponseEntity<Void> updateTraineeStatus(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody UpdateActiveStatusRequest request
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         if (request.getIsActive()) {
             traineeService.activateTrainee(request.getUsername());

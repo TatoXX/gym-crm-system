@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.epam.gym_crm_system1.dto.response.TrainingTypeResponse;
 import org.epam.gym_crm_system1.model.TrainingType;
-import org.epam.gym_crm_system1.service.AuthenticationService;
 import org.epam.gym_crm_system1.service.TrainingTypeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +20,9 @@ import java.util.stream.Collectors;
 public class TrainingTypeController {
 
     private final TrainingTypeService trainingTypeService;
-    private final AuthenticationService authenticationService;
 
-    public TrainingTypeController(TrainingTypeService trainingTypeService,
-                                  AuthenticationService authenticationService) {
+    public TrainingTypeController(TrainingTypeService trainingTypeService) {
         this.trainingTypeService = trainingTypeService;
-        this.authenticationService = authenticationService;
     }
 
     @ApiOperation(value = "Get training types")
@@ -35,10 +31,7 @@ public class TrainingTypeController {
             @ApiResponse(code = 401, message = "Invalid username or password")
     })
     @GetMapping
-    public ResponseEntity<List<TrainingTypeResponse>> getTrainingTypes(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
-    ) {
-        authenticationService.authenticateBasic(authorizationHeader);
+    public ResponseEntity<List<TrainingTypeResponse>> getTrainingTypes() {
 
         Collection<TrainingType> trainingTypes = trainingTypeService.findAllTrainingTypes();
 
