@@ -54,12 +54,13 @@ public class RegistrationController {
                 request.getDateOfBirth()
         );
 
-        traineeService.createTrainee(trainee);
+        String password = traineeService.createTrainee(trainee);
+
         gymMetricsService.incrementTraineeRegistrationCount();
 
         CredentialsResponse response = new CredentialsResponse(
                 trainee.getUserName(),
-                trainee.getPassword()
+                password
         );
 
         return ResponseEntity.ok(response);
@@ -85,12 +86,12 @@ public class RegistrationController {
                 specialization
         );
 
-        trainerService.createTrainer(trainer);
+        String password = trainerService.createTrainer(trainer);
         gymMetricsService.incrementTrainerRegistrationCount();
 
         CredentialsResponse response = new CredentialsResponse(
                 trainer.getUserName(),
-                trainer.getPassword()
+                password
         );
 
         return ResponseEntity.ok(response);

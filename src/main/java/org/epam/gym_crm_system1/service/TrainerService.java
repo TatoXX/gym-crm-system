@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -28,20 +29,23 @@ public class TrainerService {
     private final UserCredentialsGenerator userCredentialsGenerator;
     private final TrainingRepository trainingRepository;
     private final UserValidator userValidator;
+    private final PasswordEncoder passwordEncoder;
 
     public TrainerService(TrainerRepository trainerRepository,
                           TrainingRepository trainingRepository,
                           UserCredentialsGenerator userCredentialsGenerator,
-                          UserValidator userValidator) {
+                          UserValidator userValidator,
+                          PasswordEncoder passwordEncoder) {
 
         this.userValidator = userValidator;
         this.trainingRepository = trainingRepository;
         this.trainerRepository = trainerRepository;
         this.userCredentialsGenerator = userCredentialsGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
-    public void createTrainer(Trainer trainer) {
+    public String createTrainer(Trainer trainer) {
 
         if (trainer == null) {
             throw new ValidationException("Trainer is required");
@@ -66,13 +70,15 @@ public class TrainerService {
                 userCredentialsGenerator.generatePassword();
 
         trainer.setUserName(username);
-        trainer.setPassword(password);
+        trainer.setPassword(passwordEncoder.encode(password));
         trainer.setIsActive(true);
 
         trainerRepository.saveTrainer(trainer);
 
         logger.info("Trainer created successfully with username {}",
                 trainer.getUserName());
+
+        return password;
     }
 
     @Transactional(readOnly = true)
@@ -129,7 +135,10 @@ public class TrainerService {
             return false;
         }
 
-        return trainer.getPassword().equals(password);
+        return passwordEncoder.matches(
+                password,
+                trainer.getPassword()
+        );
     }
 
     @Transactional
@@ -147,14 +156,14 @@ public class TrainerService {
                 trainerRepository.findTrainerByUsername(username);
 
         if (trainer == null ||
-                !trainer.getPassword().equals(oldPassword)) {
+                !passwordEncoder.matches(oldPassword, trainer.getPassword())) {
 
             throw new InvalidCredentialsException(
                     "Invalid username or password"
             );
         }
 
-        trainer.setPassword(newPassword);
+        trainer.setPassword(passwordEncoder.encode(newPassword));
 
         trainerRepository.updateTrainer(trainer);
 

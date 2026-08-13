@@ -12,7 +12,6 @@ import org.epam.gym_crm_system1.metrics.GymMetricsService;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
-import org.epam.gym_crm_system1.service.AuthenticationService;
 import org.epam.gym_crm_system1.service.TraineeService;
 import org.epam.gym_crm_system1.service.TrainerService;
 import org.epam.gym_crm_system1.service.TrainingService;
@@ -33,18 +32,15 @@ public class TrainingController {
     private final TrainingService trainingService;
     private final TraineeService traineeService;
     private final TrainerService trainerService;
-    private final AuthenticationService authenticationService;
     private final GymMetricsService gymMetricsService;
 
     public TrainingController(TrainingService trainingService,
                               TraineeService traineeService,
                               TrainerService trainerService,
-                              AuthenticationService authenticationService,
                               GymMetricsService gymMetricsService) {
         this.trainingService = trainingService;
         this.traineeService = traineeService;
         this.trainerService = trainerService;
-        this.authenticationService = authenticationService;
         this.gymMetricsService = gymMetricsService;
     }
 
@@ -57,14 +53,12 @@ public class TrainingController {
     })
     @GetMapping("/trainee")
     public ResponseEntity<List<TraineeTrainingResponse>> getTraineeTrainings(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam String username,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodTo,
             @RequestParam(required = false) String trainerName,
             @RequestParam(required = false) String trainingType
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Collection<Training> trainings = traineeService.getTraineeTrainingsByCriteria(
                 username,
@@ -96,13 +90,11 @@ public class TrainingController {
     })
     @GetMapping("/trainer")
     public ResponseEntity<List<TrainerTrainingResponse>> getTrainerTrainings(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @RequestParam String username,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodTo,
             @RequestParam(required = false) String traineeName
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Collection<Training> trainings = trainerService.getTrainerTrainingsByCriteria(
                 username,
@@ -133,10 +125,8 @@ public class TrainingController {
     })
     @PostMapping
     public ResponseEntity<Void> addTraining(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @Valid @RequestBody AddTrainingRequest request
     ) {
-        authenticationService.authenticateBasic(authorizationHeader);
 
         Trainee trainee = traineeService.selectTraineeByUsername(request.getTraineeUsername());
         Trainer trainer = trainerService.selectTrainerByUsername(request.getTrainerUsername());

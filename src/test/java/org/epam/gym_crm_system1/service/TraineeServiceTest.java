@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
@@ -34,6 +35,9 @@ class TraineeServiceTest {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void shouldCreateTrainee() {
 
@@ -45,7 +49,7 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
+        String plainPassword = traineeService.createTrainee(trainee);
 
         Trainee savedTrainee =
                 traineeRepository.findTraineeById(trainee.getId());
@@ -53,7 +57,9 @@ class TraineeServiceTest {
         assertNotNull(savedTrainee);
         assertEquals("John.Smith", savedTrainee.getUserName());
         assertNotNull(savedTrainee.getPassword());
-        assertEquals(10, savedTrainee.getPassword().length());
+        assertEquals(10, plainPassword.length());
+        assertTrue(passwordEncoder.matches(plainPassword, savedTrainee.getPassword()));
+        assertNotEquals(plainPassword, savedTrainee.getPassword());
         assertTrue(savedTrainee.getIsActive());
     }
 
@@ -68,12 +74,12 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
+        String plainPassword = traineeService.createTrainee(trainee);
 
         boolean result =
                 traineeService.isTraineeCredentialsValid(
                         trainee.getUserName(),
-                        trainee.getPassword()
+                        plainPassword
                 );
 
         assertTrue(result);
@@ -112,9 +118,7 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
-
-        String oldPassword = trainee.getPassword();
+        String oldPassword = traineeService.createTrainee(trainee);
 
         traineeService.changeTraineePassword(
                 trainee.getUserName(),
@@ -125,8 +129,14 @@ class TraineeServiceTest {
         Trainee updatedTrainee =
                 traineeRepository.findTraineeById(trainee.getId());
 
-        assertEquals("newPassword123",
-                updatedTrainee.getPassword());
+        assertTrue(passwordEncoder.matches(
+                "newPassword123",
+                updatedTrainee.getPassword()
+        ));
+        assertFalse(passwordEncoder.matches(
+                oldPassword,
+                updatedTrainee.getPassword()
+        ));
     }
 
     @Test
@@ -644,7 +654,7 @@ class TraineeServiceTest {
         );
     }
 
-    
-    
+
+
 
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
@@ -33,6 +34,9 @@ class TrainerServiceTest {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void shouldCreateTrainer() {
 
@@ -48,7 +52,7 @@ class TrainerServiceTest {
                         trainingType
                 );
 
-        trainerService.createTrainer(trainer);
+        String plainPassword = trainerService.createTrainer(trainer);
 
         Trainer savedTrainer =
                 trainerRepository.getTrainerById(trainer.getId());
@@ -56,7 +60,9 @@ class TrainerServiceTest {
         assertNotNull(savedTrainer);
         assertEquals("John.Smith", savedTrainer.getUserName());
         assertNotNull(savedTrainer.getPassword());
-        assertEquals(10, savedTrainer.getPassword().length());
+        assertEquals(10, plainPassword.length());
+        assertTrue(passwordEncoder.matches(plainPassword, savedTrainer.getPassword()));
+        assertNotEquals(plainPassword, savedTrainer.getPassword());
         assertTrue(savedTrainer.getIsActive());
         assertEquals("FitnessTrainerService",
                 savedTrainer.getTrainingType().getName());
@@ -77,12 +83,12 @@ class TrainerServiceTest {
                         trainingType
                 );
 
-        trainerService.createTrainer(trainer);
+        String plainPassword = trainerService.createTrainer(trainer);
 
         boolean result =
                 trainerService.isTrainerCredentialsValid(
                         trainer.getUserName(),
-                        trainer.getPassword()
+                        plainPassword
                 );
 
         assertTrue(result);
@@ -129,9 +135,7 @@ class TrainerServiceTest {
                         trainingType
                 );
 
-        trainerService.createTrainer(trainer);
-
-        String oldPassword = trainer.getPassword();
+        String oldPassword = trainerService.createTrainer(trainer);
 
         trainerService.changeTrainerPassword(
                 trainer.getUserName(),
@@ -142,8 +146,14 @@ class TrainerServiceTest {
         Trainer updatedTrainer =
                 trainerRepository.getTrainerById(trainer.getId());
 
-        assertEquals("newPassword123",
-                updatedTrainer.getPassword());
+        assertTrue(passwordEncoder.matches(
+                "newPassword123",
+                updatedTrainer.getPassword()
+        ));
+        assertFalse(passwordEncoder.matches(
+                oldPassword,
+                updatedTrainer.getPassword()
+        ));
     }
 
     @Test
@@ -459,5 +469,5 @@ class TrainerServiceTest {
                 () -> trainerService.updateTrainer(trainer)
         );
     }
-    
+
 }

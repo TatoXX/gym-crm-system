@@ -14,6 +14,7 @@ import org.epam.gym_crm_system1.repository.TrainingRepository;
 import org.epam.gym_crm_system1.validator.UserValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,22 +32,25 @@ public class TraineeService {
     private final TrainingRepository trainingRepository;
     private final UserCredentialsGenerator userCredentialsGenerator;
     private final UserValidator userValidator;
+    private final PasswordEncoder passwordEncoder;
 
     public TraineeService(TraineeRepository traineeRepository,
                           TrainingRepository trainingRepository,
                           TrainerRepository trainerRepository,
                           UserCredentialsGenerator userCredentialsGenerator,
-                          UserValidator userValidator) {
+                          UserValidator userValidator,
+                          PasswordEncoder passwordEncoder) {
 
         this.traineeRepository = traineeRepository;
         this.trainingRepository = trainingRepository;
         this.trainerRepository = trainerRepository;
         this.userCredentialsGenerator = userCredentialsGenerator;
         this.userValidator = userValidator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
-    public void createTrainee(Trainee trainee) {
+    public String createTrainee(Trainee trainee) {
 
         if (trainee == null) {
             throw new ValidationException("Trainee is required");
@@ -67,13 +71,19 @@ public class TraineeService {
                 userCredentialsGenerator.generatePassword();
 
         trainee.setUserName(username);
-        trainee.setPassword(password);
+
+        // Store only the BCrypt hash in the entity/database
+        trainee.setPassword(passwordEncoder.encode(password));
+
         trainee.setIsActive(true);
 
         traineeRepository.saveTrainee(trainee);
 
         logger.info("Trainee created successfully with username {}",
                 trainee.getUserName());
+
+        // Return the original generated password to registration controller
+        return password;
     }
 
     @Transactional(readOnly = true)
@@ -136,7 +146,7 @@ public class TraineeService {
             return false;
         }
 
-        return trainee.getPassword().equals(password);
+        return passwordEncoder.matches(password, trainee.getPassword());
     }
 
     @Transactional
@@ -154,14 +164,14 @@ public class TraineeService {
                 traineeRepository.findTraineeByUsername(username);
 
         if (trainee == null ||
-                !trainee.getPassword().equals(oldPassword)) {
+                !passwordEncoder.matches(oldPassword, trainee.getPassword())) {
 
             throw new InvalidCredentialsException(
                     "Invalid username or password"
             );
         }
 
-        trainee.setPassword(newPassword);
+        trainee.setPassword(passwordEncoder.encode(newPassword));
 
         traineeRepository.updateTrainee(trainee);
 
