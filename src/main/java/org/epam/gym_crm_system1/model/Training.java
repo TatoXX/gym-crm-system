@@ -1,27 +1,54 @@
 package org.epam.gym_crm_system1.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "trainings")
 public class Training {
-    private String trainingName;
-    private TrainingType trainingType;
-    private LocalDate trainingDate;
-    private int trainingDurationMinutes;
-    private int trainerId;
-    private int traineeId;
-    private int trainingId;
-    public Training() {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int trainingId;
+
+    @Column(name = "training_name", nullable = false)
+    private String trainingName;
+
+    @ManyToOne
+    @JoinColumn(name = "training_type_id", nullable = false)
+    private TrainingType trainingType;
+
+    @Column(name = "training_date", nullable = false)
+    private LocalDate trainingDate;
+
+    @Column(name = "training_duration_minutes", nullable = false)
+    private int trainingDurationMinutes;
+
+    @ManyToOne
+    @JoinColumn(name = "trainer_id", nullable = false)
+    private Trainer trainer;
+
+    @ManyToOne
+    @JoinColumn(name = "trainee_id", nullable = false)
+    private Trainee trainee;
+
+    public Training() {
     }
 
-    public Training(String trainingName, TrainingType trainingType, LocalDate trainingDate, int trainingDurationMinutes, int trainerId, int traineeId, int trainingId) {
+    public Training(String trainingName,
+                    TrainingType trainingType,
+                    LocalDate trainingDate,
+                    int trainingDurationMinutes,
+                    Trainer trainer,
+                    Trainee trainee) {
+
         this.trainingName = trainingName;
         this.trainingType = trainingType;
         this.trainingDate = trainingDate;
         this.trainingDurationMinutes = trainingDurationMinutes;
-        this.trainerId = trainerId;
-        this.traineeId = traineeId;
-        this.trainingId = trainingId;
+        this.trainer = trainer;
+        this.trainee = trainee;
     }
 
     public int getTrainingId() {
@@ -32,6 +59,7 @@ public class Training {
         this.trainingId = trainingId;
     }
 
+
     public String getTrainingName() {
         return trainingName;
     }
@@ -39,6 +67,7 @@ public class Training {
     public void setTrainingName(String trainingName) {
         this.trainingName = trainingName;
     }
+
 
     public TrainingType getTrainingType() {
         return trainingType;
@@ -48,6 +77,7 @@ public class Training {
         this.trainingType = trainingType;
     }
 
+
     public LocalDate getTrainingDate() {
         return trainingDate;
     }
@@ -55,6 +85,7 @@ public class Training {
     public void setTrainingDate(LocalDate trainingDate) {
         this.trainingDate = trainingDate;
     }
+
 
     public int getTrainingDurationMinutes() {
         return trainingDurationMinutes;
@@ -64,33 +95,34 @@ public class Training {
         this.trainingDurationMinutes = trainingDurationMinutes;
     }
 
-    public int getTrainerId() {
-        return trainerId;
+
+    public Trainer getTrainer() {
+        return trainer;
     }
 
-    public void setTrainerId(int trainerId) {
-        this.trainerId = trainerId;
+    public void setTrainer(Trainer trainer) {
+        this.trainer = trainer;
     }
 
-    public int getTraineeId() {
-        return traineeId;
+
+    public Trainee getTrainee() {
+        return trainee;
     }
 
-    public void setTraineeId(int traineeId) {
-        this.traineeId = traineeId;
+    public void setTrainee(Trainee trainee) {
+        this.trainee = trainee;
     }
 
     @Override
     public String toString() {
         return "Training{" +
-                "trainingName='" + trainingName + '\'' +
+                "trainingId=" + trainingId +
+                ", trainingName='" + trainingName + '\'' +
                 ", trainingType=" + trainingType +
                 ", trainingDate=" + trainingDate +
                 ", trainingDurationMinutes=" + trainingDurationMinutes +
-                ", trainerId=" + trainerId +
-                ", traineeId=" + traineeId +
-                ", trainingId=" + trainingId +
+                ", trainerId=" + (trainer != null ? trainer.getId() : null) +
+                ", traineeId=" + (trainee != null ? trainee.getId() : null) +
                 '}';
     }
-
 }

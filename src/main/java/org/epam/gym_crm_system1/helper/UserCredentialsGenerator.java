@@ -1,10 +1,10 @@
 package org.epam.gym_crm_system1.helper;
 
-import org.epam.gym_crm_system1.dao.TraineeDao;
-import org.epam.gym_crm_system1.dao.TrainerDao;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.User;
+import org.epam.gym_crm_system1.repository.TraineeRepository;
+import org.epam.gym_crm_system1.repository.TrainerRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -12,14 +12,14 @@ import java.util.UUID;
 @Component
 public class UserCredentialsGenerator {
 
-    private final TraineeDao traineeDao;
-    private final TrainerDao trainerDao;
+    private final TraineeRepository traineeRepository;
+    private final TrainerRepository trainerRepository;
 
-    public UserCredentialsGenerator(TraineeDao traineeDao,
-                                    TrainerDao trainerDao) {
+    public UserCredentialsGenerator(TraineeRepository traineeRepository,
+                                    TrainerRepository trainerRepository) {
 
-        this.traineeDao = traineeDao;
-        this.trainerDao = trainerDao;
+        this.traineeRepository = traineeRepository;
+        this.trainerRepository = trainerRepository;
     }
 
     public String generateUsername(User user) {
@@ -43,16 +43,16 @@ public class UserCredentialsGenerator {
 
     private boolean usernameExists(String username) {
 
-        for (Trainee trainee : traineeDao.findAllTrainees()) {
+        for (Trainee trainee : traineeRepository.findAllTrainees()) {
 
             if (trainee.getUserName() != null
                     && trainee.getUserName().equals(username)) {
 
                 return true;
-            }                                               
+            }
         }
 
-        for (Trainer trainer : trainerDao.getAllTrainers()) {
+        for (Trainer trainer : trainerRepository.getAllTrainers()) {
 
             if (trainer.getUserName() != null
                     && trainer.getUserName().equals(username)) {
@@ -63,7 +63,6 @@ public class UserCredentialsGenerator {
 
         return false;
     }
-
 
     public String generatePassword() {
         return UUID.randomUUID()

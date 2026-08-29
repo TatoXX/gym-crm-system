@@ -1,47 +1,147 @@
 package org.epam.gym_crm_system1.service;
 
-import org.epam.gym_crm_system1.dao.TrainingDao;
-import org.epam.gym_crm_system1.model.TrainingType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.epam.gym_crm_system1.repository.TrainingRepository;
+import org.epam.gym_crm_system1.model.Trainee;
+import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
-import org.epam.gym_crm_system1.storage.Storage;
+import org.epam.gym_crm_system1.model.TrainingType;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import org.epam.gym_crm_system1.exception.ValidationException;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Transactional
 class TrainingServiceTest {
+
+    @Autowired
+    private TrainingService trainingService;
+
+    @Autowired
+    private TrainingRepository TrainingRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void shouldCreateTraining() {
-        Storage storage = new Storage();
 
-        TrainingDao trainingDao =
-                new TrainingDao(storage);
+        TrainingType trainingType =
+                new TrainingType("FitnessTrainingService");
 
-        TrainingService trainingService =
-                new TrainingService(trainingDao);
+        entityManager.persist(trainingType);
+
+        Trainer trainer =
+                new Trainer(
+                        "John",
+                        "Smith",
+                        trainingType
+                );
+
+        trainer.setUserName("John.Smith");
+        trainer.setPassword("password123");
+        trainer.setIsActive(true);
+
+        entityManager.persist(trainer);
+
+        Trainee trainee =
+                new Trainee(
+                        "Anna",
+                        "Brown",
+                        "Tbilisi",
+                        LocalDate.of(2000, 1, 1)
+                );
+
+        trainee.setUserName("Anna.Brown");
+        trainee.setPassword("password123");
+        trainee.setIsActive(true);
+
+        entityManager.persist(trainee);
 
         Training training =
                 new Training(
                         "Morning Cardio",
-                        new TrainingType(1, "Fitness"),
+                        trainingType,
                         LocalDate.of(2026, 5, 11),
                         60,
-                        1,
-                        1,
-                        1
+                        trainer,
+                        trainee
                 );
 
         trainingService.createTraining(training);
 
         Training savedTraining =
-                trainingDao.getTrainingById(1);
+                TrainingRepository.getTrainingById(training.getTrainingId());
 
         assertNotNull(savedTraining);
         assertEquals("Morning Cardio", savedTraining.getTrainingName());
         assertEquals(60, savedTraining.getTrainingDurationMinutes());
-        assertEquals(1, savedTraining.getTrainerId());
-        assertEquals(1, savedTraining.getTraineeId());
+        assertEquals(trainer.getId(), savedTraining.getTrainer().getId());
+        assertEquals(trainee.getId(), savedTraining.getTrainee().getId());
     }
+
+    @Test
+    void shouldThrowExceptionWhenTrainingNameIsBlank() {
+
+        Training training =
+                new Training(
+                        " ",
+                        null,
+                        LocalDate.of(2026, 5, 11),
+                        60,
+                        null,
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainingService.createTraining(training)
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrainingDateIsNull() {
+
+        Training training =
+                new Training(
+                        "Morning Cardio",
+                        null,
+                        null,
+                        60,
+                        null,
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainingService.createTraining(training)
+        );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTrainingDurationIsNotPositive() {
+
+        Training training =
+                new Training(
+                        "Morning Cardio",
+                        null,
+                        LocalDate.of(2026, 5, 11),
+                        0,
+                        null,
+                        null
+                );
+
+        assertThrows(
+                ValidationException.class,
+                () -> trainingService.createTraining(training)
+        );
+    }
+
+
 }
