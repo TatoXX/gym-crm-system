@@ -2,6 +2,7 @@ package org.epam.gym_crm_system1.facade;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -9,6 +10,7 @@ import org.epam.gym_crm_system1.model.TrainingType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
@@ -22,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 class GymFacadeTest {
+
+    @MockitoBean
+    private TrainerWorkloadClient trainerWorkloadClient;
 
     private static final String PASSWORD = "password123";
 

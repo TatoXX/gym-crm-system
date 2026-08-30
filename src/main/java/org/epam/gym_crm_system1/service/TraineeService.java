@@ -17,7 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
+import org.epam.gym_crm_system1.dto.request.ActionType;
+import org.epam.gym_crm_system1.dto.request.TrainerWorkloadRequest;
 
+import java.util.List;
 import java.time.LocalDate;
 import java.util.Collection;
 
@@ -33,13 +37,15 @@ public class TraineeService {
     private final UserCredentialsGenerator userCredentialsGenerator;
     private final UserValidator userValidator;
     private final PasswordEncoder passwordEncoder;
+    private final TrainerWorkloadClient trainerWorkloadClient;
 
     public TraineeService(TraineeRepository traineeRepository,
                           TrainingRepository trainingRepository,
                           TrainerRepository trainerRepository,
                           UserCredentialsGenerator userCredentialsGenerator,
                           UserValidator userValidator,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          TrainerWorkloadClient trainerWorkloadClient) {
 
         this.traineeRepository = traineeRepository;
         this.trainingRepository = trainingRepository;
@@ -47,6 +53,7 @@ public class TraineeService {
         this.userCredentialsGenerator = userCredentialsGenerator;
         this.userValidator = userValidator;
         this.passwordEncoder = passwordEncoder;
+        this.trainerWorkloadClient = trainerWorkloadClient;
     }
 
     @Transactional
@@ -120,7 +127,24 @@ public class TraineeService {
 
         logger.info("Deleting trainee with id {}", id);
 
+        Trainee trainee =
+                traineeRepository.findTraineeById(id);
+
+        if (trainee == null) {
+            traineeRepository.deleteTraineeById(id);
+
+            logger.info("Trainee deleted successfully");
+            return;
+        }
+
+        List<Training> trainingsToDelete =
+                List.copyOf(trainee.getTrainings());
+
         traineeRepository.deleteTraineeById(id);
+
+        for (Training training : trainingsToDelete) {
+            sendDeleteWorkload(training);
+        }
 
         logger.info("Trainee deleted successfully");
     }
@@ -242,7 +266,7 @@ public class TraineeService {
             throw new EntityNotFoundException("Trainee not found");
         }
 
-        traineeRepository.deleteTraineeById(trainee.getId());
+        deleteTraineeById(trainee.getId());
 
         logger.info("Trainee deleted by username successfully");
     }
@@ -380,5 +404,36 @@ public class TraineeService {
         traineeRepository.updateTrainee(trainee);
 
         logger.info("Trainee trainers list updated successfully");
+    }
+
+    private void sendDeleteWorkload(Training training) {
+
+        Trainer trainer = training.getTrainer();
+
+        TrainerWorkloadRequest workloadRequest =
+                new TrainerWorkloadRequest();
+
+        workloadRequest.setTrainerUsername(
+                trainer.getUserName());
+
+        workloadRequest.setTrainerFirstName(
+                trainer.getFirstName());
+
+        workloadRequest.setTrainerLastName(
+                trainer.getLastName());
+
+        workloadRequest.setIsActive(
+                trainer.getIsActive());
+
+        workloadRequest.setTrainingDate(
+                training.getTrainingDate());
+
+        workloadRequest.setTrainingDuration(
+                training.getTrainingDurationMinutes());
+
+        workloadRequest.setActionType(
+                ActionType.DELETE);
+
+        trainerWorkloadClient.updateWorkload(workloadRequest);
     }
 }
