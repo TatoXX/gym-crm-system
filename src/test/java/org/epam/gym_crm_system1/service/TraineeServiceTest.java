@@ -2,29 +2,38 @@ package org.epam.gym_crm_system1.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.repository.TraineeRepository;
-import org.epam.gym_crm_system1.model.Trainee;
-import org.epam.gym_crm_system1.model.Trainer;
-import org.epam.gym_crm_system1.model.Training;
-import org.epam.gym_crm_system1.model.TrainingType;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
+import org.epam.gym_crm_system1.dto.request.TrainerWorkloadRequest;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
 import org.epam.gym_crm_system1.exception.ProfileStatusException;
 import org.epam.gym_crm_system1.exception.ValidationException;
+import org.epam.gym_crm_system1.model.Trainee;
+import org.epam.gym_crm_system1.model.Trainer;
+import org.epam.gym_crm_system1.model.Training;
+import org.epam.gym_crm_system1.model.TrainingType;
+import org.epam.gym_crm_system1.repository.TraineeRepository;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
 class TraineeServiceTest {
+
+    @MockitoBean
+    private TrainerWorkloadClient trainerWorkloadClient;
 
     @Autowired
     private TraineeService traineeService;
@@ -49,17 +58,34 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        String plainPassword = traineeService.createTrainee(trainee);
+        String plainPassword =
+                traineeService.createTrainee(trainee);
 
         Trainee savedTrainee =
-                traineeRepository.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(
+                        trainee.getId()
+                );
 
         assertNotNull(savedTrainee);
-        assertEquals("John.Smith", savedTrainee.getUserName());
+        assertEquals(
+                "John.Smith",
+                savedTrainee.getUserName()
+        );
         assertNotNull(savedTrainee.getPassword());
         assertEquals(10, plainPassword.length());
-        assertTrue(passwordEncoder.matches(plainPassword, savedTrainee.getPassword()));
-        assertNotEquals(plainPassword, savedTrainee.getPassword());
+
+        assertTrue(
+                passwordEncoder.matches(
+                        plainPassword,
+                        savedTrainee.getPassword()
+                )
+        );
+
+        assertNotEquals(
+                plainPassword,
+                savedTrainee.getPassword()
+        );
+
         assertTrue(savedTrainee.getIsActive());
     }
 
@@ -74,7 +100,8 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        String plainPassword = traineeService.createTrainee(trainee);
+        String plainPassword =
+                traineeService.createTrainee(trainee);
 
         boolean result =
                 traineeService.isTraineeCredentialsValid(
@@ -118,7 +145,8 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        String oldPassword = traineeService.createTrainee(trainee);
+        String oldPassword =
+                traineeService.createTrainee(trainee);
 
         traineeService.changeTraineePassword(
                 trainee.getUserName(),
@@ -127,16 +155,23 @@ class TraineeServiceTest {
         );
 
         Trainee updatedTrainee =
-                traineeRepository.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(
+                        trainee.getId()
+                );
 
-        assertTrue(passwordEncoder.matches(
-                "newPassword123",
-                updatedTrainee.getPassword()
-        ));
-        assertFalse(passwordEncoder.matches(
-                oldPassword,
-                updatedTrainee.getPassword()
-        ));
+        assertTrue(
+                passwordEncoder.matches(
+                        "newPassword123",
+                        updatedTrainee.getPassword()
+                )
+        );
+
+        assertFalse(
+                passwordEncoder.matches(
+                        oldPassword,
+                        updatedTrainee.getPassword()
+                )
+        );
     }
 
     @Test
@@ -154,14 +189,14 @@ class TraineeServiceTest {
 
         assertThrows(
                 InvalidCredentialsException.class,
-                () -> traineeService.changeTraineePassword(
-                        trainee.getUserName(),
-                        "wrongPassword",
-                        "newPassword123"
-                )
+                () ->
+                        traineeService.changeTraineePassword(
+                                trainee.getUserName(),
+                                "wrongPassword",
+                                "newPassword123"
+                        )
         );
     }
-
 
     @Test
     void shouldDeactivateTrainee() {
@@ -176,10 +211,14 @@ class TraineeServiceTest {
 
         traineeService.createTrainee(trainee);
 
-        traineeService.deactivateTrainee(trainee.getUserName());
+        traineeService.deactivateTrainee(
+                trainee.getUserName()
+        );
 
         Trainee updatedTrainee =
-                traineeRepository.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(
+                        trainee.getId()
+                );
 
         assertFalse(updatedTrainee.getIsActive());
     }
@@ -197,11 +236,18 @@ class TraineeServiceTest {
 
         traineeService.createTrainee(trainee);
 
-        traineeService.deactivateTrainee(trainee.getUserName());
-        traineeService.activateTrainee(trainee.getUserName());
+        traineeService.deactivateTrainee(
+                trainee.getUserName()
+        );
+
+        traineeService.activateTrainee(
+                trainee.getUserName()
+        );
 
         Trainee updatedTrainee =
-                traineeRepository.findTraineeById(trainee.getId());
+                traineeRepository.findTraineeById(
+                        trainee.getId()
+                );
 
         assertTrue(updatedTrainee.getIsActive());
     }
@@ -221,7 +267,10 @@ class TraineeServiceTest {
 
         assertThrows(
                 ProfileStatusException.class,
-                () -> traineeService.activateTrainee(trainee.getUserName())
+                () ->
+                        traineeService.activateTrainee(
+                                trainee.getUserName()
+                        )
         );
     }
 
@@ -238,11 +287,16 @@ class TraineeServiceTest {
 
         traineeService.createTrainee(trainee);
 
-        traineeService.deactivateTrainee(trainee.getUserName());
+        traineeService.deactivateTrainee(
+                trainee.getUserName()
+        );
 
         assertThrows(
                 ProfileStatusException.class,
-                () -> traineeService.deactivateTrainee(trainee.getUserName())
+                () ->
+                        traineeService.deactivateTrainee(
+                                trainee.getUserName()
+                        )
         );
     }
 
@@ -262,10 +316,122 @@ class TraineeServiceTest {
         String username = trainee.getUserName();
         int traineeId = trainee.getId();
 
-        traineeService.deleteTraineeByUsername(username);
+        traineeService.deleteTraineeByUsername(
+                username
+        );
 
         assertNull(
-                traineeRepository.findTraineeById(traineeId)
+                traineeRepository.findTraineeById(
+                        traineeId
+                )
+        );
+    }
+
+    @Test
+    void shouldSendDeleteWorkloadWhenTraineeTrainingIsDeleted() {
+
+        TrainingType trainingType =
+                new TrainingType(
+                        "FitnessCascadeWorkload"
+                );
+
+        entityManager.persist(trainingType);
+
+        Trainer trainer =
+                new Trainer(
+                        "Alex",
+                        "Stone",
+                        trainingType
+                );
+
+        trainer.setUserName("Alex.Stone");
+        trainer.setPassword("password123");
+        trainer.setIsActive(true);
+
+        entityManager.persist(trainer);
+
+        Trainee trainee =
+                new Trainee(
+                        "Anna",
+                        "Brown",
+                        "Tbilisi",
+                        LocalDate.of(2000, 1, 1)
+                );
+
+        traineeService.createTrainee(trainee);
+
+        String traineeUsername =
+                trainee.getUserName();
+
+        int traineeId =
+                trainee.getId();
+
+        Training training =
+                new Training(
+                        "Cascade Delete Training",
+                        trainingType,
+                        LocalDate.of(2026, 8, 30),
+                        55,
+                        trainer,
+                        trainee
+                );
+
+        entityManager.persist(training);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        traineeService.deleteTraineeByUsername(
+                traineeUsername
+        );
+
+        ArgumentCaptor<TrainerWorkloadRequest> captor =
+                ArgumentCaptor.forClass(
+                        TrainerWorkloadRequest.class
+                );
+
+        verify(trainerWorkloadClient)
+                .updateWorkload(captor.capture());
+
+        TrainerWorkloadRequest request =
+                captor.getValue();
+
+        assertEquals(
+                "Alex.Stone",
+                request.getTrainerUsername()
+        );
+
+        assertEquals(
+                "Alex",
+                request.getTrainerFirstName()
+        );
+
+        assertEquals(
+                "Stone",
+                request.getTrainerLastName()
+        );
+
+        assertTrue(request.getIsActive());
+
+        assertEquals(
+                LocalDate.of(2026, 8, 30),
+                request.getTrainingDate()
+        );
+
+        assertEquals(
+                55,
+                request.getTrainingDuration()
+        );
+
+        assertEquals(
+                "DELETE",
+                request.getActionType().name()
+        );
+
+        assertNull(
+                traineeRepository.findTraineeById(
+                        traineeId
+                )
         );
     }
 
@@ -274,7 +440,10 @@ class TraineeServiceTest {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> traineeService.deleteTraineeByUsername("Unknown.User")
+                () ->
+                        traineeService.deleteTraineeByUsername(
+                                "Unknown.User"
+                        )
         );
     }
 
@@ -283,7 +452,10 @@ class TraineeServiceTest {
 
         assertThrows(
                 ValidationException.class,
-                () -> traineeService.deleteTraineeByUsername(" ")
+                () ->
+                        traineeService.deleteTraineeByUsername(
+                                " "
+                        )
         );
     }
 
@@ -306,10 +478,16 @@ class TraineeServiceTest {
                 );
 
         assertNotNull(foundTrainee);
-        assertEquals(trainee.getUserName(),
-                foundTrainee.getUserName());
-        assertEquals("John",
-                foundTrainee.getFirstName());
+
+        assertEquals(
+                trainee.getUserName(),
+                foundTrainee.getUserName()
+        );
+
+        assertEquals(
+                "John",
+                foundTrainee.getFirstName()
+        );
     }
 
     @Test
@@ -317,7 +495,10 @@ class TraineeServiceTest {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> traineeService.selectTraineeByUsername("Unknown.User")
+                () ->
+                        traineeService.selectTraineeByUsername(
+                                "Unknown.User"
+                        )
         );
     }
 
@@ -325,10 +506,14 @@ class TraineeServiceTest {
     void shouldGetTraineeTrainingsByCriteria() {
 
         TrainingType fitness =
-                new TrainingType("FitnessTraineeCriteria");
+                new TrainingType(
+                        "FitnessTraineeCriteria"
+                );
 
         TrainingType yoga =
-                new TrainingType("YogaTraineeCriteria");
+                new TrainingType(
+                        "YogaTraineeCriteria"
+                );
 
         entityManager.persist(fitness);
         entityManager.persist(yoga);
@@ -393,21 +578,35 @@ class TraineeServiceTest {
         entityManager.persist(training2);
 
         Collection<Training> trainings =
-                traineeService.getTraineeTrainingsByCriteria(
-                        trainee.getUserName(),
-                        LocalDate.of(2026, 5, 1),
-                        LocalDate.of(2026, 5, 15),
-                        "Alex.Stone",
-                        "FitnessTraineeCriteria"
-                );
+                traineeService
+                        .getTraineeTrainingsByCriteria(
+                                trainee.getUserName(),
+                                LocalDate.of(
+                                        2026,
+                                        5,
+                                        1
+                                ),
+                                LocalDate.of(
+                                        2026,
+                                        5,
+                                        15
+                                ),
+                                "Alex.Stone",
+                                "FitnessTraineeCriteria"
+                        );
 
-        assertEquals(1, trainings.size());
+        assertEquals(
+                1,
+                trainings.size()
+        );
 
         Training foundTraining =
                 trainings.iterator().next();
 
-        assertEquals("Morning Cardio",
-                foundTraining.getTrainingName());
+        assertEquals(
+                "Morning Cardio",
+                foundTraining.getTrainingName()
+        );
     }
 
     @Test
@@ -415,25 +614,38 @@ class TraineeServiceTest {
 
         assertThrows(
                 ValidationException.class,
-                () -> traineeService.getTraineeTrainingsByCriteria(
-                        "Anna.Brown",
-                        LocalDate.of(2026, 6, 1),
-                        LocalDate.of(2026, 5, 1),
-                        null,
-                        null
-                )
+                () ->
+                        traineeService
+                                .getTraineeTrainingsByCriteria(
+                                        "Anna.Brown",
+                                        LocalDate.of(
+                                                2026,
+                                                6,
+                                                1
+                                        ),
+                                        LocalDate.of(
+                                                2026,
+                                                5,
+                                                1
+                                        ),
+                                        null,
+                                        null
+                                )
         );
     }
-
 
     @Test
     void shouldGetTrainersNotAssignedToTrainee() {
 
         TrainingType fitness =
-                new TrainingType("FitnessNotAssigned");
+                new TrainingType(
+                        "FitnessNotAssigned"
+                );
 
         TrainingType yoga =
-                new TrainingType("YogaNotAssigned");
+                new TrainingType(
+                        "YogaNotAssigned"
+                );
 
         entityManager.persist(fitness);
         entityManager.persist(yoga);
@@ -445,11 +657,17 @@ class TraineeServiceTest {
                         fitness
                 );
 
-        assignedTrainer.setUserName("Alex.Stone");
-        assignedTrainer.setPassword("password123");
+        assignedTrainer.setUserName(
+                "Alex.Stone"
+        );
+        assignedTrainer.setPassword(
+                "password123"
+        );
         assignedTrainer.setIsActive(true);
 
-        entityManager.persist(assignedTrainer);
+        entityManager.persist(
+                assignedTrainer
+        );
 
         Trainer notAssignedTrainer =
                 new Trainer(
@@ -458,11 +676,17 @@ class TraineeServiceTest {
                         yoga
                 );
 
-        notAssignedTrainer.setUserName("Bob.Green");
-        notAssignedTrainer.setPassword("password123");
+        notAssignedTrainer.setUserName(
+                "Bob.Green"
+        );
+        notAssignedTrainer.setPassword(
+                "password123"
+        );
         notAssignedTrainer.setIsActive(true);
 
-        entityManager.persist(notAssignedTrainer);
+        entityManager.persist(
+                notAssignedTrainer
+        );
 
         Trainee trainee =
                 new Trainee(
@@ -472,30 +696,48 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
+        traineeService.createTrainee(
+                trainee
+        );
 
-        trainee.getTrainers().add(assignedTrainer);
-        assignedTrainer.getTrainees().add(trainee);
+        trainee.getTrainers()
+                .add(assignedTrainer);
+
+        assignedTrainer.getTrainees()
+                .add(trainee);
 
         entityManager.merge(trainee);
         entityManager.merge(assignedTrainer);
 
         Collection<Trainer> trainers =
-                traineeService.getTrainersNotAssignedToTrainee(
-                        trainee.getUserName()
-                );
+                traineeService
+                        .getTrainersNotAssignedToTrainee(
+                                trainee.getUserName()
+                        );
 
-        assertFalse(trainers.contains(assignedTrainer));
-        assertTrue(trainers.contains(notAssignedTrainer));
+        assertFalse(
+                trainers.contains(
+                        assignedTrainer
+                )
+        );
+
+        assertTrue(
+                trainers.contains(
+                        notAssignedTrainer
+                )
+        );
     }
-
 
     @Test
     void shouldThrowExceptionWhenGettingNotAssignedTrainersForUnknownTrainee() {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> traineeService.getTrainersNotAssignedToTrainee("Unknown.User")
+                () ->
+                        traineeService
+                                .getTrainersNotAssignedToTrainee(
+                                        "Unknown.User"
+                                )
         );
     }
 
@@ -503,41 +745,71 @@ class TraineeServiceTest {
     void shouldUpdateTraineeTrainersList() {
 
         TrainingType fitness =
-                new TrainingType("FitnessUpdateList");
+                new TrainingType(
+                        "FitnessUpdateList"
+                );
 
         TrainingType yoga =
-                new TrainingType("YogaUpdateList");
+                new TrainingType(
+                        "YogaUpdateList"
+                );
 
         TrainingType boxing =
-                new TrainingType("BoxingUpdateList");
+                new TrainingType(
+                        "BoxingUpdateList"
+                );
 
         entityManager.persist(fitness);
         entityManager.persist(yoga);
         entityManager.persist(boxing);
 
         Trainer oldTrainer =
-                new Trainer("Alex", "Stone", fitness);
+                new Trainer(
+                        "Alex",
+                        "Stone",
+                        fitness
+                );
 
-        oldTrainer.setUserName("Alex.Stone");
-        oldTrainer.setPassword("password123");
+        oldTrainer.setUserName(
+                "Alex.Stone"
+        );
+        oldTrainer.setPassword(
+                "password123"
+        );
         oldTrainer.setIsActive(true);
 
         entityManager.persist(oldTrainer);
 
         Trainer newTrainer1 =
-                new Trainer("Bob", "Green", yoga);
+                new Trainer(
+                        "Bob",
+                        "Green",
+                        yoga
+                );
 
-        newTrainer1.setUserName("Bob.Green");
-        newTrainer1.setPassword("password123");
+        newTrainer1.setUserName(
+                "Bob.Green"
+        );
+        newTrainer1.setPassword(
+                "password123"
+        );
         newTrainer1.setIsActive(true);
 
         entityManager.persist(newTrainer1);
 
         Trainer newTrainer2 =
-                new Trainer("Mike", "Black", boxing);
+                new Trainer(
+                        "Mike",
+                        "Black",
+                        boxing
+                );
 
-        newTrainer2.setUserName("Mike.Black");
-        newTrainer2.setPassword("password123");
+        newTrainer2.setUserName(
+                "Mike.Black"
+        );
+        newTrainer2.setPassword(
+                "password123"
+        );
         newTrainer2.setIsActive(true);
 
         entityManager.persist(newTrainer2);
@@ -550,49 +822,83 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
+        traineeService.createTrainee(
+                trainee
+        );
 
-        trainee.getTrainers().add(oldTrainer);
-        oldTrainer.getTrainees().add(trainee);
+        trainee.getTrainers()
+                .add(oldTrainer);
+
+        oldTrainer.getTrainees()
+                .add(trainee);
 
         entityManager.merge(oldTrainer);
         entityManager.flush();
 
-        traineeService.updateTraineeTrainersList(
-                trainee.getUserName(),
-                List.of("Bob.Green", "Mike.Black")
-        );
+        traineeService
+                .updateTraineeTrainersList(
+                        trainee.getUserName(),
+                        List.of(
+                                "Bob.Green",
+                                "Mike.Black"
+                        )
+                );
 
         entityManager.flush();
         entityManager.clear();
 
         Trainee updatedTrainee =
-                traineeService.selectTraineeByUsername(trainee.getUserName());
+                traineeService
+                        .selectTraineeByUsername(
+                                trainee.getUserName()
+                        );
 
-        assertEquals(2, updatedTrainee.getTrainers().size());
-
-        assertTrue(
-                updatedTrainee.getTrainers()
-                        .stream()
-                        .anyMatch(trainer ->
-                                trainer.getUserName().equals("Bob.Green"))
+        assertEquals(
+                2,
+                updatedTrainee
+                        .getTrainers()
+                        .size()
         );
 
         assertTrue(
-                updatedTrainee.getTrainers()
+                updatedTrainee
+                        .getTrainers()
                         .stream()
-                        .anyMatch(trainer ->
-                                trainer.getUserName().equals("Mike.Black"))
+                        .anyMatch(
+                                trainer ->
+                                        trainer.getUserName()
+                                                .equals(
+                                                        "Bob.Green"
+                                                )
+                        )
+        );
+
+        assertTrue(
+                updatedTrainee
+                        .getTrainers()
+                        .stream()
+                        .anyMatch(
+                                trainer ->
+                                        trainer.getUserName()
+                                                .equals(
+                                                        "Mike.Black"
+                                                )
+                        )
         );
 
         assertFalse(
-                updatedTrainee.getTrainers()
+                updatedTrainee
+                        .getTrainers()
                         .stream()
-                        .anyMatch(trainer ->
-                                trainer.getUserName().equals("Alex.Stone"))
+                        .anyMatch(
+                                trainer ->
+                                        trainer.getUserName()
+                                                .equals(
+                                                        "Alex.Stone"
+                                                )
+                        )
         );
     }
-
 
     @Test
     void shouldThrowExceptionWhenUpdatingTraineeTrainersListWithUnknownTrainer() {
@@ -605,14 +911,20 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
+        traineeService.createTrainee(
+                trainee
+        );
 
         assertThrows(
                 EntityNotFoundException.class,
-                () -> traineeService.updateTraineeTrainersList(
-                        trainee.getUserName(),
-                        List.of("Unknown.Trainer")
-                )
+                () ->
+                        traineeService
+                                .updateTraineeTrainersList(
+                                        trainee.getUserName(),
+                                        List.of(
+                                                "Unknown.Trainer"
+                                        )
+                                )
         );
     }
 
@@ -629,7 +941,10 @@ class TraineeServiceTest {
 
         assertThrows(
                 ValidationException.class,
-                () -> traineeService.createTrainee(trainee)
+                () ->
+                        traineeService.createTrainee(
+                                trainee
+                        )
         );
     }
 
@@ -644,17 +959,18 @@ class TraineeServiceTest {
                         LocalDate.of(2000, 1, 1)
                 );
 
-        traineeService.createTrainee(trainee);
+        traineeService.createTrainee(
+                trainee
+        );
 
         trainee.setPassword(" ");
 
         assertThrows(
                 ValidationException.class,
-                () -> traineeService.updateTrainee(trainee)
+                () ->
+                        traineeService.updateTrainee(
+                                trainee
+                        )
         );
     }
-
-
-
-
 }

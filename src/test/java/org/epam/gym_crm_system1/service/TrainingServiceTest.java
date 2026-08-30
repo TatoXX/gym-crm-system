@@ -13,12 +13,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.epam.gym_crm_system1.exception.ValidationException;
 import java.time.LocalDate;
+import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
 class TrainingServiceTest {
+
+    @MockitoBean
+    private TrainerWorkloadClient trainerWorkloadClient;
 
     @Autowired
     private TrainingService trainingService;
