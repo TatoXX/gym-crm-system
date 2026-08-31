@@ -1,16 +1,17 @@
 package org.epam.gym_crm_system1.service;
 
+import org.epam.gym_crm_system1.dto.request.ActionType;
+import org.epam.gym_crm_system1.dto.request.TrainerWorkloadRequest;
 import org.epam.gym_crm_system1.exception.ValidationException;
+import org.epam.gym_crm_system1.messaging.TrainerWorkloadProducer;
+import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
 import org.epam.gym_crm_system1.repository.TrainingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
-import org.epam.gym_crm_system1.dto.request.ActionType;
-import org.epam.gym_crm_system1.dto.request.TrainerWorkloadRequest;
-import org.epam.gym_crm_system1.model.Trainer;
+
 import java.util.Collection;
 
 @Service
@@ -20,14 +21,14 @@ public class TrainingService {
             LoggerFactory.getLogger(TrainingService.class);
 
     private final TrainingRepository trainingRepository;
-    private final TrainerWorkloadClient trainerWorkloadClient;
+    private final TrainerWorkloadProducer trainerWorkloadProducer;
 
     public TrainingService(
             TrainingRepository trainingRepository,
-            TrainerWorkloadClient trainerWorkloadClient) {
+            TrainerWorkloadProducer trainerWorkloadProducer) {
 
         this.trainingRepository = trainingRepository;
-        this.trainerWorkloadClient = trainerWorkloadClient;
+        this.trainerWorkloadProducer = trainerWorkloadProducer;
     }
 
     @Transactional
@@ -47,7 +48,9 @@ public class TrainingService {
         }
 
         if (training.getTrainingDurationMinutes() <= 0) {
-            throw new ValidationException("Training duration must be positive");
+            throw new ValidationException(
+                    "Training duration must be positive"
+            );
         }
 
         if (training.getTrainingType() == null) {
@@ -62,8 +65,10 @@ public class TrainingService {
             throw new ValidationException("Trainee is required");
         }
 
-        logger.info("Creating training with id {}",
-                training.getTrainingId());
+        logger.info(
+                "Creating training with id {}",
+                training.getTrainingId()
+        );
 
         trainingRepository.saveTraining(training);
 
@@ -72,17 +77,31 @@ public class TrainingService {
         TrainerWorkloadRequest workloadRequest =
                 new TrainerWorkloadRequest();
 
-        workloadRequest.setTrainerUsername(trainer.getUserName());
-        workloadRequest.setTrainerFirstName(trainer.getFirstName());
-        workloadRequest.setTrainerLastName(trainer.getLastName());
-        workloadRequest.setIsActive(trainer.getIsActive());
-        workloadRequest.setTrainingDate(training.getTrainingDate());
+        workloadRequest.setTrainerUsername(
+                trainer.getUserName()
+        );
+        workloadRequest.setTrainerFirstName(
+                trainer.getFirstName()
+        );
+        workloadRequest.setTrainerLastName(
+                trainer.getLastName()
+        );
+        workloadRequest.setIsActive(
+                trainer.getIsActive()
+        );
+        workloadRequest.setTrainingDate(
+                training.getTrainingDate()
+        );
         workloadRequest.setTrainingDuration(
                 training.getTrainingDurationMinutes()
         );
-        workloadRequest.setActionType(ActionType.ADD);
+        workloadRequest.setActionType(
+                ActionType.ADD
+        );
 
-        trainerWorkloadClient.updateWorkload(workloadRequest);
+        trainerWorkloadProducer.sendWorkloadUpdate(
+                workloadRequest
+        );
 
         logger.info("Training created successfully");
     }
@@ -90,7 +109,10 @@ public class TrainingService {
     @Transactional(readOnly = true)
     public Training selectTrainingById(int id) {
 
-        logger.info("Selecting training with id {}", id);
+        logger.info(
+                "Selecting training with id {}",
+                id
+        );
 
         return trainingRepository.getTrainingById(id);
     }
