@@ -9,7 +9,6 @@ import org.epam.trainerworkloadservice.repository.TrainerWorkloadRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TrainerWorkloadService {
@@ -21,10 +20,10 @@ public class TrainerWorkloadService {
 
     public TrainerWorkloadService(
             TrainerWorkloadRepository trainerWorkloadRepository) {
+
         this.trainerWorkloadRepository = trainerWorkloadRepository;
     }
 
-    @Transactional
     public void updateWorkload(TrainerWorkloadRequest request) {
 
         logger.info(
@@ -37,62 +36,44 @@ public class TrainerWorkloadService {
 
         TrainerWorkload trainerWorkload =
                 trainerWorkloadRepository
-                        .findByTrainerUsername(request.getTrainerUsername())
-                        .orElseGet(() -> createTrainerWorkload(request));
+                        .findByTrainerUsername(
+                                request.getTrainerUsername()
+                        )
+                        .orElseGet(() ->
+                                createTrainerWorkload(request)
+                        );
 
-        trainerWorkload.setTrainerFirstName(request.getTrainerFirstName());
-        trainerWorkload.setTrainerLastName(request.getTrainerLastName());
-        trainerWorkload.setTrainerStatus(request.getIsActive());
+        updateTrainerProfile(
+                trainerWorkload,
+                request
+        );
 
-        int yearValue = request.getTrainingDate().getYear();
-        int monthValue = request.getTrainingDate().getMonthValue();
+        int yearValue =
+                request.getTrainingDate().getYear();
 
-        YearSummary yearSummary = trainerWorkload.getYears()
-                .stream()
-                .filter(year -> year.getYear().equals(yearValue))
-                .findFirst()
-                .orElseGet(() ->
-                        createYearSummary(trainerWorkload, yearValue));
+        int monthValue =
+                request.getTrainingDate().getMonthValue();
 
-        MonthSummary monthSummary = yearSummary.getMonths()
-                .stream()
-                .filter(month -> month.getMonth().equals(monthValue))
-                .findFirst()
-                .orElseGet(() ->
-                        createMonthSummary(yearSummary, monthValue));
-
-        int currentDuration =
-                monthSummary.getTrainingSummaryDuration();
-
-        if (request.getActionType() == ActionType.ADD) {
-
-            monthSummary.setTrainingSummaryDuration(
-                    currentDuration + request.getTrainingDuration()
-            );
-
-        } else {
-
-            int updatedDuration =
-                    currentDuration - request.getTrainingDuration();
-
-            if (updatedDuration < 0) {
-
-                logger.warn(
-                        "Trainer workload update rejected. trainerUsername={}, currentDuration={}, requestedDeleteDuration={}",
-                        request.getTrainerUsername(),
-                        currentDuration,
-                        request.getTrainingDuration()
+        YearSummary yearSummary =
+                findOrCreateYearSummary(
+                        trainerWorkload,
+                        yearValue
                 );
 
-                throw new IllegalArgumentException(
-                        "Training summary duration cannot be negative"
+        MonthSummary monthSummary =
+                findOrCreateMonthSummary(
+                        yearSummary,
+                        monthValue
                 );
-            }
 
-            monthSummary.setTrainingSummaryDuration(updatedDuration);
-        }
+        updateTrainingDuration(
+                monthSummary,
+                request
+        );
 
-        trainerWorkloadRepository.save(trainerWorkload);
+        trainerWorkloadRepository.save(
+                trainerWorkload
+        );
 
         logger.info(
                 "Trainer workload updated successfully. trainerUsername={}, year={}, month={}, totalDuration={}",
@@ -107,25 +88,65 @@ public class TrainerWorkloadService {
             TrainerWorkloadRequest request) {
 
         logger.info(
-                "Creating workload record for trainer. trainerUsername={}",
+                "Creating new trainer workload document. trainerUsername={}",
                 request.getTrainerUsername()
         );
 
-        TrainerWorkload trainerWorkload = new TrainerWorkload();
+        TrainerWorkload trainerWorkload =
+                new TrainerWorkload();
 
         trainerWorkload.setTrainerUsername(
-                request.getTrainerUsername());
+                request.getTrainerUsername()
+        );
 
         trainerWorkload.setTrainerFirstName(
-                request.getTrainerFirstName());
+                request.getTrainerFirstName()
+        );
 
         trainerWorkload.setTrainerLastName(
-                request.getTrainerLastName());
+                request.getTrainerLastName()
+        );
 
         trainerWorkload.setTrainerStatus(
-                request.getIsActive());
+                request.getIsActive()
+        );
 
         return trainerWorkload;
+    }
+
+    private void updateTrainerProfile(
+            TrainerWorkload trainerWorkload,
+            TrainerWorkloadRequest request) {
+
+        trainerWorkload.setTrainerFirstName(
+                request.getTrainerFirstName()
+        );
+
+        trainerWorkload.setTrainerLastName(
+                request.getTrainerLastName()
+        );
+
+        trainerWorkload.setTrainerStatus(
+                request.getIsActive()
+        );
+    }
+
+    private YearSummary findOrCreateYearSummary(
+            TrainerWorkload trainerWorkload,
+            int yearValue) {
+
+        return trainerWorkload.getYears()
+                .stream()
+                .filter(year ->
+                        year.getYear().equals(yearValue)
+                )
+                .findFirst()
+                .orElseGet(() ->
+                        createYearSummary(
+                                trainerWorkload,
+                                yearValue
+                        )
+                );
     }
 
     private YearSummary createYearSummary(
@@ -138,14 +159,34 @@ public class TrainerWorkloadService {
                 yearValue
         );
 
-        YearSummary yearSummary = new YearSummary();
+        YearSummary yearSummary =
+                new YearSummary();
 
         yearSummary.setYear(yearValue);
-        yearSummary.setTrainerWorkload(trainerWorkload);
 
-        trainerWorkload.getYears().add(yearSummary);
+        trainerWorkload
+                .getYears()
+                .add(yearSummary);
 
         return yearSummary;
+    }
+
+    private MonthSummary findOrCreateMonthSummary(
+            YearSummary yearSummary,
+            int monthValue) {
+
+        return yearSummary.getMonths()
+                .stream()
+                .filter(month ->
+                        month.getMonth().equals(monthValue)
+                )
+                .findFirst()
+                .orElseGet(() ->
+                        createMonthSummary(
+                                yearSummary,
+                                monthValue
+                        )
+                );
     }
 
     private MonthSummary createMonthSummary(
@@ -158,18 +199,61 @@ public class TrainerWorkloadService {
                 monthValue
         );
 
-        MonthSummary monthSummary = new MonthSummary();
+        MonthSummary monthSummary =
+                new MonthSummary();
 
         monthSummary.setMonth(monthValue);
-        monthSummary.setTrainingSummaryDuration(0);
-        monthSummary.setYearSummary(yearSummary);
 
-        yearSummary.getMonths().add(monthSummary);
+        monthSummary.setTrainingSummaryDuration(0);
+
+        yearSummary
+                .getMonths()
+                .add(monthSummary);
 
         return monthSummary;
     }
 
-    @Transactional(readOnly = true)
+    private void updateTrainingDuration(
+            MonthSummary monthSummary,
+            TrainerWorkloadRequest request) {
+
+        int currentDuration =
+                monthSummary.getTrainingSummaryDuration();
+
+        if (request.getActionType()
+                == ActionType.ADD) {
+
+            monthSummary.setTrainingSummaryDuration(
+                    currentDuration
+                            + request.getTrainingDuration()
+            );
+
+            return;
+        }
+
+        int updatedDuration =
+                currentDuration
+                        - request.getTrainingDuration();
+
+        if (updatedDuration < 0) {
+
+            logger.warn(
+                    "Trainer workload update rejected. trainerUsername={}, currentDuration={}, requestedDeleteDuration={}",
+                    request.getTrainerUsername(),
+                    currentDuration,
+                    request.getTrainingDuration()
+            );
+
+            throw new IllegalArgumentException(
+                    "Training summary duration cannot be negative"
+            );
+        }
+
+        monthSummary.setTrainingSummaryDuration(
+                updatedDuration
+        );
+    }
+
     public Integer getMonthlyWorkload(
             String trainerUsername,
             int yearValue,
@@ -182,9 +266,12 @@ public class TrainerWorkloadService {
                 monthValue
         );
 
-        TrainerWorkload trainerWorkload = trainerWorkloadRepository
-                .findByTrainerUsername(trainerUsername)
-                .orElse(null);
+        TrainerWorkload trainerWorkload =
+                trainerWorkloadRepository
+                        .findByTrainerUsername(
+                                trainerUsername
+                        )
+                        .orElse(null);
 
         if (trainerWorkload == null) {
 
@@ -196,14 +283,26 @@ public class TrainerWorkloadService {
             return null;
         }
 
-        Integer duration = trainerWorkload.getYears()
-                .stream()
-                .filter(year -> year.getYear().equals(yearValue))
-                .flatMap(year -> year.getMonths().stream())
-                .filter(month -> month.getMonth().equals(monthValue))
-                .map(MonthSummary::getTrainingSummaryDuration)
-                .findFirst()
-                .orElse(null);
+        Integer duration =
+                trainerWorkload.getYears()
+                        .stream()
+                        .filter(year ->
+                                year.getYear()
+                                        .equals(yearValue)
+                        )
+                        .flatMap(year ->
+                                year.getMonths().stream()
+                        )
+                        .filter(month ->
+                                month.getMonth()
+                                        .equals(monthValue)
+                        )
+                        .map(
+                                MonthSummary::
+                                        getTrainingSummaryDuration
+                        )
+                        .findFirst()
+                        .orElse(null);
 
         if (duration == null) {
 
