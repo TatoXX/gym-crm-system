@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.epam.gym_crm_system1.exception.ValidationException;
 import java.time.LocalDate;
-import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
+import org.epam.gym_crm_system1.messaging.TrainerWorkloadProducer;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TrainingServiceTest {
 
     @MockitoBean
-    private TrainerWorkloadClient trainerWorkloadClient;
+    private TrainerWorkloadProducer trainerWorkloadProducer;
 
     @Autowired
     private TrainingService trainingService;

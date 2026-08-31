@@ -2,7 +2,7 @@ package org.epam.gym_crm_system1.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
+import org.epam.gym_crm_system1.messaging.TrainerWorkloadProducer;
 import org.epam.gym_crm_system1.dto.request.TrainerWorkloadRequest;
 import org.epam.gym_crm_system1.exception.EntityNotFoundException;
 import org.epam.gym_crm_system1.exception.InvalidCredentialsException;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 class TraineeServiceTest {
 
     @MockitoBean
-    private TrainerWorkloadClient trainerWorkloadClient;
+    private TrainerWorkloadProducer trainerWorkloadProducer;
 
     @Autowired
     private TraineeService traineeService;
@@ -390,8 +390,8 @@ class TraineeServiceTest {
                         TrainerWorkloadRequest.class
                 );
 
-        verify(trainerWorkloadClient)
-                .updateWorkload(captor.capture());
+        verify(trainerWorkloadProducer)
+                .sendWorkloadUpdate(captor.capture());
 
         TrainerWorkloadRequest request =
                 captor.getValue();

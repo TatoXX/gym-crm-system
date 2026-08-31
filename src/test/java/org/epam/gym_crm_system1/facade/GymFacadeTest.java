@@ -2,7 +2,7 @@ package org.epam.gym_crm_system1.facade;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
+import org.epam.gym_crm_system1.messaging.TrainerWorkloadProducer;
 import org.epam.gym_crm_system1.model.Trainee;
 import org.epam.gym_crm_system1.model.Trainer;
 import org.epam.gym_crm_system1.model.Training;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GymFacadeTest {
 
     @MockitoBean
-    private TrainerWorkloadClient trainerWorkloadClient;
+    private TrainerWorkloadProducer trainerWorkloadProducer;
 
     private static final String PASSWORD = "password123";
 

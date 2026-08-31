@@ -17,10 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.epam.gym_crm_system1.client.TrainerWorkloadClient;
-import org.epam.gym_crm_system1.dto.request.ActionType;
 import org.epam.gym_crm_system1.dto.request.TrainerWorkloadRequest;
-
+import org.epam.gym_crm_system1.dto.request.ActionType;
+import org.epam.gym_crm_system1.messaging.TrainerWorkloadProducer;
 import java.util.List;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -37,7 +36,7 @@ public class TraineeService {
     private final UserCredentialsGenerator userCredentialsGenerator;
     private final UserValidator userValidator;
     private final PasswordEncoder passwordEncoder;
-    private final TrainerWorkloadClient trainerWorkloadClient;
+    private final TrainerWorkloadProducer trainerWorkloadProducer;
 
     public TraineeService(TraineeRepository traineeRepository,
                           TrainingRepository trainingRepository,
@@ -45,7 +44,7 @@ public class TraineeService {
                           UserCredentialsGenerator userCredentialsGenerator,
                           UserValidator userValidator,
                           PasswordEncoder passwordEncoder,
-                          TrainerWorkloadClient trainerWorkloadClient) {
+                          TrainerWorkloadProducer trainerWorkloadProducer) {
 
         this.traineeRepository = traineeRepository;
         this.trainingRepository = trainingRepository;
@@ -53,7 +52,7 @@ public class TraineeService {
         this.userCredentialsGenerator = userCredentialsGenerator;
         this.userValidator = userValidator;
         this.passwordEncoder = passwordEncoder;
-        this.trainerWorkloadClient = trainerWorkloadClient;
+        this.trainerWorkloadProducer = trainerWorkloadProducer;
     }
 
     @Transactional
@@ -434,6 +433,6 @@ public class TraineeService {
         workloadRequest.setActionType(
                 ActionType.DELETE);
 
-        trainerWorkloadClient.updateWorkload(workloadRequest);
+        trainerWorkloadProducer.sendWorkloadUpdate(workloadRequest);
     }
 }
